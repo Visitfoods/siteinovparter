@@ -54,7 +54,9 @@ package.json.bak
 
 # security - API keys and secrets storage
 data/api-keys.json
+# Bloquear pastas data na raiz, mas permitir src/data/
 data/
+!src/data/
 *.key
 *.pem
 *.p12

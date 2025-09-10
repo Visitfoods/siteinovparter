@@ -3,9 +3,7 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   // Configuração da API
   experimental: {
-    serverActions: {
-      allowedOrigins: ['localhost:3000', 'localhost:3002']
-    },
+    serverActions: true,
   },
 
   // Configuração para imagens de domínios externos

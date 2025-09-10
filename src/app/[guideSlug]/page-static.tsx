@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import GuideView from './__pp_copy/page';
-import { staticGuideData, GuideVideos } from '../data/staticData';
+import { staticGuideData, GuideVideos } from '../../data/staticData';
 
 type PageProps = { params: { guideSlug: string } };
 
