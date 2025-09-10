@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import GuideView from './[guideSlug]/__pp_copy/page';
-import { staticGuideData, GuideVideos } from '../data/staticData';
+import { staticGuideData, GuideVideos } from '@/data/staticData';
 import styles from './static-page.module.css';
 
 export default function StaticGuideWrapper() {
