@@ -1,0 +1,111 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# security - ALL SCRIPTS (development and utility scripts)
+scripts/
+
+# security - ALL DOCUMENTATION FILES
+*.md
+
+# security - FTP credentials and sensitive files
+ftp_env_variables.txt
+*.txt.bak
+*.json.bak
+package.json.bak
+
+# security - API keys and secrets storage
+data/api-keys.json
+data/
+*.key
+*.pem
+*.p12
+*.pfx
+
+# security - environment files (even if not present)
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.test
+
+# security - logs that might contain sensitive data
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# security - temporary files that might contain secrets
+*.tmp
+*.temp
+.cache/
+.temp/
+temp/
+
+# security - backup files
+*.backup
+*.bak
+*~
+
+# security - IDE and editor files that might contain secrets
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*~
+
+# security - OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# security - test files that might contain sensitive data
+test-*.js
+test-*.ts
+*-test.js
+*-test.ts

@@ -1,0 +1,139 @@
+.banner {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 25%, #404040 50%, #333333 75%, #262626 100%);
+  color: white;
+  padding: 20px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 10000;
+  border-top: 3px solid #51aecd;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.text {
+  flex: 1;
+}
+
+.text p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.text p:last-child {
+  margin-bottom: 0;
+}
+
+.link {
+  color: #51aecd;
+  text-decoration: none;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  border-bottom: 1px dotted rgba(81, 174, 205, 0.5);
+}
+
+.link:hover {
+  color: #cb3c58;
+  border-bottom-color: #cb3c58;
+  text-decoration: none;
+}
+
+.buttons {
+  display: flex;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.acceptButton {
+  background: linear-gradient(135deg,rgba(155, 42, 136, 1) 0%, rgba(158, 58, 176, 1) 51%, rgba(107, 14, 96, 1) 100%);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 20px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  min-width: 80px;
+  box-shadow: 0 4px 15px rgba(81, 174, 205, 0.4);
+}
+
+.acceptButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(81, 174, 205, 0.6);
+}
+
+.declineButton {
+  background: transparent;
+  color: #cbd5e1;
+  border: 2px solid #cbd5e1;
+  padding: 10px 22px;
+  border-radius: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  min-width: 80px;
+}
+
+.declineButton:hover {
+  background: #cbd5e1;
+  color: #1a1a1a;
+  transform: translateY(-1px);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .banner {
+    padding: 15px;
+  }
+  
+  .content {
+    flex-direction: column;
+    gap: 15px;
+    text-align: center;
+  }
+  
+  .text p {
+    font-size: 13px;
+  }
+  
+  .buttons {
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .acceptButton,
+  .declineButton {
+    flex: 1;
+    max-width: 120px;
+  }
+}
+
+@media (max-width: 480px) {
+  .banner {
+    padding: 12px;
+  }
+  
+  .text p {
+    font-size: 12px;
+  }
+  
+  .acceptButton,
+  .declineButton {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+}
