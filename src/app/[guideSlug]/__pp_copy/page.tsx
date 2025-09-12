@@ -6141,7 +6141,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
           }
         }}>
           <img
-            src="/gifs/vertopal.com_4.apng"
+            src="/gifs/4.gif"
             alt="GIF Animation"
             className={smallVideoStyles.smallVideo}
             style={{ objectFit: 'cover', width: '100%', height: '100%' }}
