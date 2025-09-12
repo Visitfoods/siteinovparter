@@ -1,5 +1,6 @@
 'use client';
 import styles from "./page.module.css";
+import smallVideoStyles from "./small-video.module.css";
 import React, { useState, useRef, useEffect, FormEvent, useCallback } from "react";
 import { useSanitizedHtml } from "@/utils/htmlSanitizer";
 import MobileOptimizedVideo from "../../../components/MobileOptimizedVideo";
@@ -8,7 +9,7 @@ import { useVideoOptimization, usePiPOptimization } from "../../../hooks/useVide
 
 import Image from "next/image";
 import Lottie from "lottie-react";
-import { saveContactRequest, createConversation, sendMessage, listenToConversation, closeConversation, type Conversation, type ChatMessage, getConversation } from "../../../firebase/services";
+// Firebase removido
 
 // Tipo local que estende ChatMessage com metadata para compatibilidade com GuideChatMessage
 type ExtendedChatMessage = ChatMessage & {
@@ -24,7 +25,7 @@ type ExtendedChatMessage = ChatMessage & {
     fromChatbot?: boolean;
   };
 };
-import { createGuideConversation, sendGuideMessage, listenToGuideConversation, getGuideConversation, closeGuideConversation } from "../../../firebase/guideServices";
+// Firebase removido
 
 // Interface para os vídeos do guia
 interface GuideVideos {
@@ -431,14 +432,11 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
     }
   }, [videoOptimization]);
   // UI state variables
-  const [isLoading, setIsLoading] = useState(true);
-  const [loadingProgress, setLoadingProgress] = useState(0);
   const [showGuidePopup, setShowGuidePopup] = useState(false);
   const [isPromoMode, setIsPromoMode] = useState(false);
   const [showPromoPopup, setShowPromoPopup] = useState(false);
-  const [showStartButton, setShowStartButton] = useState(true);
+  const [showStartButton, setShowStartButton] = useState(false);
   const [showActionButtons, setShowActionButtons] = useState(false);
-  const [hasAnimatedLottie, setHasAnimatedLottie] = useState(false);
   const [showChatbotPopup, setShowChatbotPopup] = useState(false);
   const [chatbotMessages, setChatbotMessages] = useState<Array<{from: 'user' | 'bot', text: string, metadata?: { fromChatbot?: boolean }}>>([]);
   const [showInstructions, setShowInstructions] = useState(true);
@@ -579,8 +577,24 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
     const bg = bgVideoRef.current;
     const welcome = welcomeBgVideoRef.current;
 
-    const onBgCanPlay = () => { setBgVideoReady(true); setBgProgress(100); };
-    const onWelcomeCanPlay = () => { setWelcomeBgReady(true); setWelcomeBgProgress(100); };
+    const onBgCanPlay = () => { 
+      setBgVideoReady(true); 
+      setBgProgress(100); 
+      
+      // Pausar vídeo de fundo em mobile/tablet
+      if (window.innerWidth <= 1024 && bg) {
+        bg.pause();
+      }
+    };
+    const onWelcomeCanPlay = () => { 
+      setWelcomeBgReady(true); 
+      setWelcomeBgProgress(100); 
+      
+      // Pausar vídeo de fundo em mobile/tablet
+      if (window.innerWidth <= 1024 && welcome) {
+        welcome.pause();
+      }
+    };
 
     if (bg) {
       bg.addEventListener('canplaythrough', onBgCanPlay, { once: true });
@@ -595,19 +609,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
     };
   }, [guideVideos?.backgroundVideoURL]);
 
-  // Atualizar a barra de progresso inicial com base no progresso real dos vídeos
-  useEffect(() => {
-    const hasWelcomeVideo = !!(guideVideos?.welcomeVideoURL);
-    const mainPart = hasWelcomeVideo ? (mainVideoError ? 100 : mainVideoProgress) : 100;
-    const clamped = Math.max(0, Math.min(mainPart, 99));
-    setLoadingProgress((prev) => (mainPart >= 100 ? 100 : Math.max(prev, clamped)));
-
-    const mainReady = mainVideoLoaded || !hasWelcomeVideo || mainVideoError;
-    if (mainReady) {
-      setLoadingProgress(100);
-      setIsLoading(false);
-    }
-  }, [guideVideos?.welcomeVideoURL, mainVideoProgress, mainVideoLoaded, mainVideoError]);
+  // Loading removido - site carrega diretamente
 
   // Carregar conversa do localStorage no início
   useEffect(() => {
@@ -714,13 +716,15 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
   const [isTablet, setIsTablet] = useState(false);
   const [preferHold, setPreferHold] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // Vídeo pequeno fixo: ref próprio, independente do vídeo principal
+  const smallFixedVideoRef = useRef<HTMLVideoElement>(null);
   // Guardar estado de som antes de abrir o formulário para restaurar depois
   const preFormMutedRef = useRef<boolean | null>(null);
 
   // Controlar vídeos quando popup de promoção estiver aberto
   useEffect(() => {
     // Em PC, não fazer nada - vídeos continuam sempre a reproduzir
-    if (isDesktop) {
+    if (window.innerWidth > 1024) {
       return;
     }
 
@@ -744,7 +748,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
       const t2 = setTimeout(forcePauseAll, 200);
       return () => { clearTimeout(t1); clearTimeout(t2); };
     }
-  }, [showPromoPopup, isDesktop]);
+  }, [showPromoPopup]);
   const pipVideoRef = useRef<HTMLVideoElement>(null);
   const bgVideoRef = useRef<HTMLVideoElement>(null);
   const welcomeBgVideoRef = useRef<HTMLVideoElement>(null);
@@ -1198,11 +1202,20 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                   videoRef.current.pause();
                   setVideoPlaying(false);
                 } else {
-                  // Smartphone: Continuar vídeo onde estava
-                  videoRef.current.muted = videoMuted; // Respeitar preferência salva
-                  setVideoMuted(videoMuted);
-                  videoRef.current.play();
-                  setVideoPlaying(true);
+                  // Mobile/Tablet: Pausar vídeo principal e vídeo PiP
+                  videoRef.current.pause();
+                  setVideoPlaying(false);
+                  
+                  // Pausar vídeo PiP se estiver a reproduzir
+                  if (pipVideoRef.current && !pipVideoRef.current.paused) {
+                    pipVideoRef.current.pause();
+                    setPipVideoPlaying(false);
+                  }
+                  
+                  // Pausar vídeo de fundo se estiver a reproduzir
+                  if (bgVideoRef.current && !bgVideoRef.current.paused) {
+                    bgVideoRef.current.pause();
+                  }
                 }
               }
               
@@ -1252,6 +1265,47 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
     return () => {
       window.removeEventListener('resize', checkDeviceType);
     };
+  }, []);
+
+  // Efeito de aproximação das imagens durante o scroll - mais suave
+  useEffect(() => {
+    const handleScroll = () => {
+      const bannerContainer = document.querySelector(`.${styles.bannerImagesContainer}`);
+      if (bannerContainer) {
+        const scrollY = window.scrollY;
+        const threshold = 50; // Começar o efeito após 50px de scroll
+        const maxScroll = 200; // Efeito completo após 200px de scroll
+        
+        if (scrollY > threshold) {
+          // Calcular progresso suave (0 a 1)
+          const progress = Math.min((scrollY - threshold) / (maxScroll - threshold), 1);
+          
+          // Aplicar classe quando progresso > 0.3 para transição mais suave
+          if (progress > 0.3) {
+            bannerContainer.classList.add(styles.scrolled);
+          } else {
+            bannerContainer.classList.remove(styles.scrolled);
+          }
+        } else {
+          bannerContainer.classList.remove(styles.scrolled);
+        }
+      }
+    };
+
+    // Throttle para melhor performance
+    let ticking = false;
+    const throttledHandleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          handleScroll();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', throttledHandleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', throttledHandleScroll);
   }, []);
 
   // Controlar scroll e posição do vídeo quando chatbot está aberto
@@ -1532,11 +1586,20 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                   videoRef.current.pause();
                   setVideoPlaying(false);
                 } else {
-                  // Smartphone: Continuar vídeo onde estava
-                  videoRef.current.muted = videoMuted; // Respeitar preferência salva
-                  setVideoMuted(videoMuted);
-                  videoRef.current.play();
-                  setVideoPlaying(true);
+                  // Mobile/Tablet: Pausar vídeo principal e vídeo PiP
+                  videoRef.current.pause();
+                  setVideoPlaying(false);
+                  
+                  // Pausar vídeo PiP se estiver a reproduzir
+                  if (pipVideoRef.current && !pipVideoRef.current.paused) {
+                    pipVideoRef.current.pause();
+                    setPipVideoPlaying(false);
+                  }
+                  
+                  // Pausar vídeo de fundo se estiver a reproduzir
+                  if (bgVideoRef.current && !bgVideoRef.current.paused) {
+                    bgVideoRef.current.pause();
+                  }
                 }
               }
               
@@ -1815,7 +1878,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
           if (!Number.isNaN(t) && Math.abs((pip.currentTime || 0) - t) > 0.2) {
             pip.currentTime = t;
           }
-          // Se está pausado, tentar iniciar (mute se necessário por política)
+          // NÃO reproduzir automaticamente o PiP - apenas configurar
           if (pip.paused) {
             // Usar o estado de mute anterior
             const targetMuted = preFormMutedRef.current ?? videoMuted;
@@ -1824,45 +1887,12 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
             // Depois configurar o mute
             pip.muted = targetMuted;
             
-            // Otimista: mostrar ícone de pausa enquanto tentamos iniciar
-            setPipVideoPlaying(true);
-            pip.play()
-              .then(() => {
-                setPipVideoPlaying(true);
-                setVideoMuted(targetMuted); // Sincronizar estado
-                // Verificar novamente se o áudio está corretamente configurado
-                if (!targetMuted) {
-                  setTimeout(() => {
-                    try {
-                      pip.volume = 1;
-                      pip.muted = false;
-                    } catch {}
-                  }, 100);
-                }
-              })
-              .catch(() => {
-                // fallback: tentar em mute e depois restaurar
-                pip.volume = 0;
-                pip.muted = true;
-                pip.play()
-                  .then(() => {
-                    // Tentar restaurar o som após um pequeno delay
-                    setTimeout(() => {
-                      if (!targetMuted) {
-                        try {
-                          pip.volume = 1;
-                          pip.muted = false;
-                          setVideoMuted(false);
-                        } catch {}
-                      }
-                    }, 300); // Aumentado para 300ms para garantir que o navegador tenha tempo de processar
-                    setPipVideoPlaying(true);
-                  })
-                  .catch(() => setPipVideoPlaying(false));
-              });
+            // Manter PiP pausado - não reproduzir automaticamente
+            setPipVideoPlaying(false);
           } else {
-            // Já está a reproduzir
-            setPipVideoPlaying(true);
+            // Se já está a reproduzir, pausar
+            pip.pause();
+            setPipVideoPlaying(false);
           }
         } catch {}
       }
@@ -1876,35 +1906,24 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
         setPipManuallyClosed(false);
       }
       
-      // Retomar o vídeo principal quando chat ou formulário fecha em mobile
+      // NÃO retomar o vídeo principal automaticamente quando chat fecha em mobile
+      // O vídeo deve permanecer pausado conforme implementado em handleCloseChatbot
       if (!isDesktop && videoRef.current && !showGuidePopup && !showChatbotPopup && !showHumanChat) {
         try {
-          // Usar o tempo do PiP se disponível, ou o tempo salvo anteriormente
+          // Apenas sincronizar o tempo sem reproduzir
           const currentTime = pipVideoRef.current?.currentTime || savedVideoTime || 0;
-          // Ajuste fino para compensar latência
           videoRef.current.currentTime = Math.max(0, currentTime - 0.05);
           
-          // Restaurar estado de som do vídeo principal
-          const targetMuted = preFormMutedRef.current ?? videoMuted;
-          videoRef.current.muted = targetMuted;
-          videoRef.current.volume = targetMuted ? 0 : 1;
-          
-          // Retomar reprodução do vídeo principal se não estiver em mute
-          if (!targetMuted) {
-            videoRef.current.play()
-              .then(() => {
-                setVideoPlaying(true);
-                setVideoMuted(targetMuted);
-              })
-              .catch(error => { /* Erro ao retomar vídeo principal */ });
-          }
+          // Manter vídeo pausado
+          videoRef.current.pause();
+          setVideoPlaying(false);
           
           // Limpar a referência do estado de som
           setTimeout(() => {
             preFormMutedRef.current = null;
           }, 200);
         } catch (e) {
-          // Erro ao retomar vídeo principal
+          // Erro ao sincronizar vídeo principal
         }
       }
 
@@ -2026,10 +2045,8 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
           // Depois configurar o mute
           pipVideoRef.current.muted = targetMuted;
           
-          // Se o PiP estiver visível e o som estiver ativado, tentar tocar
-          if (pipVisible && !targetMuted) {
-            safePlay(pipVideoRef.current);
-          }
+          // NÃO reproduzir PiP automaticamente - apenas configurar
+          // O PiP deve permanecer pausado até o utilizador clicar manualmente
         }
         
         // Depois configurar o vídeo principal
@@ -2058,8 +2075,17 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
     const pipVideo = pipVideoRef.current;
     if (!pipVideo) return;
 
-    const handlePlay = () => setPipVideoPlaying(true);
-    const handlePause = () => setPipVideoPlaying(false);
+    const handlePlay = () => {
+      console.log('PiP: play event - setting pipVideoPlaying to true');
+      setPipVideoPlaying(true);
+    };
+    const handlePause = () => {
+      console.log('PiP: pause event - setting pipVideoPlaying to false');
+      setPipVideoPlaying(false);
+    };
+
+    // Sincronizar estado inicial
+    setPipVideoPlaying(!pipVideo.paused);
 
     pipVideo.addEventListener('play', handlePlay);
     pipVideo.addEventListener('pause', handlePause);
@@ -2068,7 +2094,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
       pipVideo.removeEventListener('play', handlePlay);
       pipVideo.removeEventListener('pause', handlePause);
     };
-  }, []);
+  }, [pipVisible]); // Re-executar quando PiP se torna visível
 
   // Pré-aquecer o vídeo do PiP em background para comutação instantânea
   useEffect(() => {
@@ -2234,7 +2260,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
       // Ir para o ecrã imediatamente após "Começar a conversa"
       setShowStartButton(false);
 
-      // Preparar e iniciar o vídeo principal a partir do ponto do PiP
+      // Sincronizar tempo do vídeo principal com o PiP, mas NÃO reproduzir
       try {
         const pipTime = pipVideoRef.current?.currentTime || 0;
         if (videoRef.current) {
@@ -2243,7 +2269,8 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
           }
           // Respeitar preferência de som atual
           try { videoRef.current.muted = videoMuted; } catch {}
-          safePlay(videoRef.current).then(() => setVideoPlaying(true));
+          // NÃO reproduzir o vídeo principal - manter pausado
+          // O vídeo deve permanecer pausado quando se volta do PiP
         }
       } catch {}
 
@@ -3191,10 +3218,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
     }
     
     // Em desktop, abrir o chatbot automaticamente. Em mobile, não abrir.
-    if (isDesktop) {
-      setShowChatbotPopup(true);
-      setReturnedFromAiAfterHuman(true);
-    }
+    // Removido auto-open do chatbot em desktop
     
     // Comportamento diferente para desktop e mobile
     if (videoRef.current) {
@@ -3266,9 +3290,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
       setShowHumanChat(false);
     }
     
-    // Sempre abrir o chatbot quando clicar na barra de pesquisa (tanto desktop quanto mobile)
-    setShowChatbotPopup(true);
-    setReturnedFromAiAfterHuman(true);
+    // Desativado: não abrir chatbot ao clicar na barra de pesquisa
     
     // Comportamento diferente para desktop e mobile
     if (videoRef.current) {
@@ -3502,11 +3524,20 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
         // Isso mostra a barra de pesquisa + "Falar com guia real"
         setShowStartButton(false);
       } else {
-        // Mobile: Continuar vídeo automaticamente com som
-        videoRef.current.muted = videoMuted; // Respeitar preferência salva
-        setVideoMuted(videoMuted);
-        videoRef.current.play();
-        setVideoPlaying(true);
+        // Mobile/Tablet: Pausar vídeo principal e vídeo PiP
+        videoRef.current.pause();
+        setVideoPlaying(false);
+        
+        // Pausar vídeo PiP se estiver a reproduzir
+        if (pipVideoRef.current && !pipVideoRef.current.paused) {
+          pipVideoRef.current.pause();
+          setPipVideoPlaying(false);
+        }
+        
+        // Pausar vídeo de fundo se estiver a reproduzir
+        if (bgVideoRef.current && !bgVideoRef.current.paused) {
+          bgVideoRef.current.pause();
+        }
       }
     }
   }
@@ -4545,35 +4576,6 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
   const svgContainerRef = useRef<HTMLDivElement>(null);
   const lottieRef = useRef<any>(null);
 
-  // Efeito para animar o Lottie quando a seção se torna visível
-  useEffect(() => {
-    if (!showActionButtons || hasAnimatedLottie) return;
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && !hasAnimatedLottie) {
-            setHasAnimatedLottie(true);
-            if (lottieRef.current) {
-              lottieRef.current.play();
-            }
-          }
-        });
-      },
-      { threshold: 0.3 }
-    );
-
-    if (svgContainerRef.current) {
-      observer.observe(svgContainerRef.current);
-    }
-
-    return () => {
-      if (svgContainerRef.current) {
-        observer.unobserve(svgContainerRef.current);
-      }
-    };
-  }, [showActionButtons, hasAnimatedLottie]);
-
   // Efeito de scale no scroll
   useEffect(() => {
     if (!showActionButtons) return;
@@ -4606,108 +4608,86 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
 
   return (
     <>
-      {/* Loading Screen */}
-      {isLoading && (
-        <div className={styles.loadingOverlay}>
-          <div className={styles.loadingContent}>
-            <h2 className={styles.loadingTitle}>A preparar o teu guia</h2>
-            <div className={styles.loadingProgressContainer}>
-              <div className={styles.loadingProgressBar}>
-                <div 
-                  className={styles.loadingProgressFill}
-                  style={{ width: `${loadingProgress}%` }}
-                ></div>
-              </div>
-              <span className={styles.loadingProgressText}>{Math.round(loadingProgress)}%</span>
-            </div>
-            <div className={styles.loadingSpinner}>
-              <div className={styles.spinner}></div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Loading Screen removido */}
       
-      <div className={`${styles.bgVideoContainer} ${showChatbotPopup ? styles.chatbotOpen : ''} ${showHumanChat ? styles.humanChatOpen : ''} ${showActionButtons ? styles.started : ''}`}>
-        {/* Barra de bandeiras no topo */}
-        <div className={styles.flagsBar}>
-          <div className={styles.flagsContainer}>
-            {/* Logo Inov Partner */}
-            <div className={styles.logoContainer}>
-              <img 
-                src="/logoinov/Inov-branco.png" 
-                alt="Inov Partner" 
-                className={styles.logoImage}
-              />
-            </div>
-            
-            {/* Botão de voltar para chat - aparece quando há conversa no chat com AI e não há chats abertos */}
-            {chatbotMessages.length > 0 && !showChatbotPopup && !showHumanChat && (
-              <button 
-                className={styles.backToChatButton}
-                onClick={() => {
-                  setShowChatbotPopup(true);
-                  if (videoRef.current) {
-                    if (!isDesktop) {
-                      // Em mobile e tablet, pausar o vídeo principal quando abrir o chat
-                      videoRef.current.pause();
-                      setVideoPlaying(false);
-                    } else {
-                      // Em PC, garantir que o vídeo principal continue a reproduzir
-                      if (videoRef.current.paused) {
-                        videoRef.current.play();
-                        setVideoPlaying(true);
-                      }
+      {/* Barra de bandeiras no topo - MOVIDA PARA FORA DO CONTAINER */}
+      <div className={styles.flagsBar}>
+        <div className={styles.flagsContainer}>
+          {/* Logo Inov Partner */}
+          <div className={styles.logoContainer}>
+            <img 
+              src="/logoinov/Inov-branco.png" 
+              alt="Inov Partner" 
+              className={styles.logoImage}
+            />
+          </div>
+          
+          {/* Botão de voltar para chat - aparece quando há conversa no chat com AI e não há chats abertos */}
+          {false && chatbotMessages.length > 0 && !showChatbotPopup && !showHumanChat && (
+            <button 
+              className={styles.backToChatButton}
+              onClick={() => {
+                // Desativado: não abrir chatbot
+                if (videoRef.current) {
+                  if (!isDesktop) {
+                    // Em mobile e tablet, pausar o vídeo principal quando abrir o chat
+                    videoRef.current.pause();
+                    setVideoPlaying(false);
+                  } else {
+                    // Em PC, garantir que o vídeo principal continue a reproduzir
+                    if (videoRef.current.paused) {
+                      videoRef.current.play();
+                      setVideoPlaying(true);
                     }
                   }
-                }}
-                title="Voltar ao chat"
-                aria-label="Voltar ao chat"
-              >
-                <span className={styles.buttonText}>voltar conversa</span>
-              </button>
-            )}
-            <div className={styles.flagsGroup}>
-              <div className={styles.flagItem} onClick={() => handleFlagClick('portugal')}>
-                <PortugalFlag />
-              </div>
-              <div className={styles.flagItem} onClick={() => handleFlagClick('england')}>
-                <EnglandFlag />
-              </div>
-              <div className={styles.flagItem} onClick={() => handleFlagClick('spain')}>
-                <SpainFlag />
-              </div>
-              <div className={styles.flagItem} onClick={() => handleFlagClick('france')}>
-                <FranceFlag />
-              </div>
+                }
+              }}
+              title="Voltar ao chat"
+              aria-label="Voltar ao chat"
+            >
+              <span className={styles.buttonText}>voltar conversa</span>
+            </button>
+          )}
+          <div className={styles.flagsGroup}>
+            <div className={styles.flagItem} onClick={() => handleFlagClick('portugal')}>
+              <PortugalFlag />
+            </div>
+            <div className={styles.flagItem} onClick={() => handleFlagClick('england')}>
+              <EnglandFlag />
+            </div>
+            <div className={styles.flagItem} onClick={() => handleFlagClick('spain')}>
+              <SpainFlag />
+            </div>
+            <div className={styles.flagItem} onClick={() => handleFlagClick('france')}>
+              <FranceFlag />
             </div>
           </div>
         </div>
+      </div>
+      
+      <div className={`${styles.bgVideoContainer} ${showChatbotPopup ? styles.chatbotOpen : ''} ${showHumanChat ? styles.humanChatOpen : ''} ${showActionButtons ? styles.started : ''}`}>
 
-        {/* Vídeo de fundo quando o vídeo principal não está em reprodução */}
+        {/* Gradiente animado de fundo */}
         {(!isDesktop || (isDesktop && !showChatbotPopup && !showHumanChat)) && (
-          <video
-            ref={bgVideoRef}
-            className={getVideoClassName(styles.backgroundImage)}
-            src={toStreamUrl(guideVideos?.backgroundVideoURL) || "/videos da pagina/background.mp4"}
-            onError={(e) => {
-              console.error('❌ Erro ao carregar vídeo de fundo:', e);
-              console.log('🔍 URL do vídeo de fundo:', guideVideos?.backgroundVideoURL);
-              // Marcar como "pronto" para não bloquear o loader
-              setBgVideoError(true);
-              setBgVideoReady(true);
-              setBgProgress(100);
-            }}
-            autoPlay
-            loop
-            muted
-            playsInline
-            crossOrigin="anonymous"
-            preload={isSlowNetwork ? 'metadata' : 'auto'}
-            style={{
-              objectFit: 'cover',
-              objectPosition: 'center 15px'
-            }}
-          />
+          <div className={styles.animatedGradientBackground}>
+            {/* Imagens de banner por cima do gradiente */}
+            <div className={styles.bannerImagesContainer}>
+              <img 
+                src="/imagens banners/mao2.png" 
+                alt="Mão Neon - Frame Quadrado" 
+                className={styles.bannerImage1}
+              />
+              <img 
+                src="/imagens banners/mao.png" 
+                alt="Mão Natural - Frame Redondo" 
+                className={styles.bannerImage2}
+              />
+              {/* Texto "BE A PARTNER" */}
+              <div className={styles.bannerText}>
+                BE A PARTNER
+              </div>
+            </div>
+          </div>
         )}
 
         {/* Vídeo principal - só mostrar quando não está na welcome page */}
@@ -4737,7 +4717,8 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                 mainVideoLoaded &&
                 (
                   // Em desktop, não esconder quando os chats estão abertos; apenas enquanto preferHold estiver ativo
-                  !isDesktop || !preferHold
+                  // Em mobile/tablet, sempre esconder o vídeo principal (só mostrar PiP)
+                  isDesktop ? (!preferHold) : false
                 )
               ) ? 'block' : 'none'
             }}
@@ -4847,83 +4828,9 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
           </div>
         )}
 
-        {/* Barra de Pesquisa - mostrar quando não está na welcome page e chats fechados */}
-        {!showStartButton && !showChatbotPopup && !showHumanChat && !showGuidePopup && (
-          <div className={`${styles.glassmorphismControlBar} ${styles['page-module___8aEwW__glassmorphismControlBar']}`}>
-            <div className={styles.searchInputContainer}>
-              <div className={styles.searchInputWrapper}>
-                <svg className={styles.chatInputIcon} width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M12 22C17.5228 22 22 17.5228 22 12 C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 13.8214 2.48697 15.5291 3.33782 17L2.5 21.5L7 20.6622C8.47087 21.513 10.1786 22 12 22Z" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  <path d="M8 12H16" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M8 8H13" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                  <path d="M8 16H11" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-                <input 
-                  type="text"
-                  className={styles.searchInput}
-                  placeholder="Escreva a sua pergunta"
-                  onClick={handleSearchBarClick}
-                  readOnly
-                />
-                <button className={styles.searchButton} onClick={(e) => {
-                  if (!isDesktop && pipVideoRef.current && videoRef.current) {
-                    try {
-                      // Pausar o vídeo principal IMEDIATAMENTE
-                      videoRef.current.pause();
-                      setVideoPlaying(false);
-                      
-                      // Sincronizar tempo e preparar PiP
-                      const time = videoRef.current.currentTime || 0;
-                      pipVideoRef.current.currentTime = time;
-                      
-                      // Preservar preferência de som original
-                      // Primeiro configurar o volume para garantir que o áudio esteja corretamente configurado
-                      pipVideoRef.current.volume = videoMuted ? 0 : 1;
-                      // Depois configurar o mute
-                      pipVideoRef.current.muted = videoMuted;
-                      
-                      // PLAY SÍNCRONO - crucial para Android
-                      const playPromise = safePlay(pipVideoRef.current);
-                      
-                      // Após iniciar com sucesso
-                      playPromise.then(() => {
-                        setPipVideoPlaying(true);
-                        // Garantir que o som está conforme a preferência do usuário
-                        try { 
-                          pipVideoRef.current!.volume = videoMuted ? 0 : 1;
-                          pipVideoRef.current!.muted = videoMuted; 
-                        } catch {}
-                      }).catch(err => {
-                        console.error('Erro no PiP:', err);
-                        // Tentar novamente com mute (política de autoplay)
-                        try {
-                          pipVideoRef.current!.muted = true;
-                          safePlay(pipVideoRef.current!).then(() => {
-                            setPipVideoPlaying(true);
-                            // Restaurar som após iniciar, se necessário
-                            if (!videoMuted) {
-                              setTimeout(() => {
-                                try { pipVideoRef.current!.muted = false; } catch {}
-                              }, 100);
-                            }
-                          });
-                        } catch {}
-                      });
-                    } catch (err) {
-                      console.error('Erro ao preparar PiP:', err);
-                    }
-                  }
-                  handleSearchBarClick();
-                }}>
-                  <SendIcon />
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Barra branca de largura total para abrir chat real - mostrar quando não está na welcome page e chats/popups fechados */}
-        {!showStartButton && !showChatbotPopup && !showHumanChat && !showGuidePopup && (guideVideos?.humanChatEnabled ?? true) && (
+        {false && !showStartButton && !showChatbotPopup && !showHumanChat && !showGuidePopup && (guideVideos?.humanChatEnabled ?? true) && (
           <div className={styles.chatLinkBar}>
             <button onClick={(e) => {
               setShowChatbotPopup(false);
@@ -5047,8 +4954,8 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
 
 
 
-        {/* Popup do Chatbot */}
-        {showChatbotPopup && (
+        {/* Popup do Chatbot (desativado) */}
+        {false && showChatbotPopup && (
           <div className={styles.chatbotPopupOverlay}>
             <div className={`${styles.chatbotPopup} ${showChatbotPopup ? styles.fullscreenPopup : ''}`}>
               <div className={styles.chatbotHeader}>
@@ -5289,7 +5196,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                 </form>
                 
                 {/* Botão para falar com guia real - só quando ativado */}
-                {(guideVideos?.humanChatEnabled ?? true) && (
+                {false && (guideVideos?.humanChatEnabled ?? true) && (
                   <div className={styles.guideRealLinkContainer}>
                     <button 
                       className={styles.guideRealLink}
@@ -5434,6 +5341,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
       {showActionButtons && (
         <div className={styles.logosSliderSection}>
           <div className={styles.logosSliderContainer}>
+            <h3 className={styles.logosSliderTitle}>Parceiros</h3>
             <div className={styles.logosSlider}>
                 <div className={styles.logosTrack}>
                   <div className={styles.logoItem}>
@@ -5537,28 +5445,28 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
       {showActionButtons && (
         <div className={styles.servicesSection}>
           <div className={styles.servicesContainer}>
+            <h2 className={styles.servicesSectionTitle}>Serviços</h2>
             <div className={styles.servicesGrid}>
               {/* Linha superior - Virtual Guide destacado */}
               <div className={styles.servicesTopRow}>
                 <div className={`${styles.serviceCard} ${styles.featuredServiceCard}`}>
-                  <div>
-                    <div className={styles.serviceIcon}>
-                      <img src="/icons-dos-servicos/virtualguide-72x.png" alt="Virtual Guide" />
+                  <div className={styles.featuredServiceContent}>
+                    <div className={styles.serviceHeaderRow}>
+                      <div className={styles.serviceIcon}>
+                        <img src="/icons-dos-servicos/virtualguide-72x.png" alt="Virtual Guide" />
+                      </div>
                     </div>
-                    <div className={styles.serviceContent}>
-                      <h3 className={styles.serviceTitle}>VIRTUAL GUIDE.INFO</h3>
+                    <h3 className={styles.serviceTitle}>VIRTUAL GUIDE.INFO</h3>
+                    <div className={styles.serviceTextContent}>
                       <p className={styles.serviceDescription}>
                         Guia virtual, movido em AI, que orienta os utilizadores na exploração de locais, produtos ou serviços de forma interativa.
                       </p>
                     </div>
-                  </div>
-                  <div className={styles.serviceLottie}>
-                    <Lottie
-                      animationData={require('/public/svg areasdenegocio/animation-lottie-3.json')}
-                      loop={true}
-                      autoplay={true}
-                      style={{ width: '100%', height: '200px' }}
-                    />
+                    <div className={styles.serviceGifsContainer}>
+                      <img src="/gifs/1.gif" alt="Virtual Guide Animation 1" className={styles.serviceGif} />
+                      <img src="/gifs/2.gif" alt="Virtual Guide Animation 2" className={styles.serviceGif} />
+                      <img src="/gifs/3.gif" alt="Virtual Guide Animation 3" className={styles.serviceGif} />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -5576,7 +5484,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                 </div>
                 <div className={styles.serviceCard}>
                   <div className={styles.serviceIcon}>
-                    <img src="/icons-dos-servicos/virtualchat-72x.png" alt="Visit Postal" />
+                    <img src="/icons-dos-servicos/visitpostal-72x.png" alt="Visit Postal" />
                   </div>
                   <h3 className={styles.serviceTitle}>VISIT POSTAL.INFO</h3>
                   <p className={styles.serviceDescription}>
@@ -5614,7 +5522,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
             <div ref={svgContainerRef} className={styles.svgContainer}>
               <Lottie 
                 lottieRef={lottieRef}
-                animationData={require('../../../../public/svg areasdenegocio/animation-lottie-4.json')}
+                animationData={require('../../../../public/svg areasdenegocio/animation-lottie-5.json')}
                 className={styles.businessAreasSvg}
                 loop={false}
                 autoplay={false}
@@ -5625,135 +5533,124 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
         </div>
       )}
 
-      {/* Seção FAQ */}
-      {showActionButtons && faqData.length > 0 && (
-        <div className={styles.faqSection}>
-          <div className={styles.faqContainer}>
-            <div className={styles.faqHeader}>
-              <h2 className={styles.faqTitle}>FAQ</h2>
-            </div>
-            
-            {faqData.length > 0 && (
-            <div className={styles.faqCategories}>
-              {faqData.map((category, index) => (
-                <button 
-                  key={index}
-                  className={`${styles.faqCategory} ${activeCategory === index ? styles.activeCategory : ''}`}
-                  onClick={() => handleCategoryChange(index)}
-                >
-                  {category.name}
-                </button>
-              ))}
-            </div>
-            )}
-
-            {faqData.length > 0 && (
-            <div className={styles.faqContent}>
-              {faqData[activeCategory].questions.map((item, index) => (
-                <div key={index} className={`${styles.faqItem} ${expandedFaq === index ? styles.expanded : ''}`}>
-                  <div className={styles.faqQuestion} onClick={() => handleFaqToggle(index)}>
-                    <span>{item.question}</span>
-                    <span className={styles.faqIcon}>▼</span>
-                  </div>
-                  <div className={styles.faqAnswer}>
-                    {item.answer}
-                  </div>
-                </div>
-              ))}
-            </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Seção de Contacto */}
-      {showActionButtons && (((guideVideos as any)?.contactInfo?.enabled ?? true)) && (
-        <div className={styles.contactSection}>
-          <div className={styles.contactContainer}>
-            {/* Título removido conforme pedido */}
-            
-            <div className={styles.contactContent}>
-              <div className={styles.contactLeft}>
-                <div className={styles.mapContainer}>
-                  <iframe
-                    src={guideVideos.contactInfo?.mapEmbedUrl || ""}
-                    width="100%"
-                    height="400"
-                    style={{ border: 0 }}
-                    allowFullScreen
-                    loading="lazy"
-                    referrerPolicy="no-referrer-when-downgrade"
-                    title="Localização do Parque"
-                  ></iframe>
-                </div>
-              </div>
-              
-              <div className={styles.contactRight}>
-                <div className={styles.contactInfo}>
-                  <div className={styles.contactItem}>
-                    <h3 className={styles.contactItemTitle}>{guideVideos.contactInfo?.callUsTitle || 'Contacte-nos'}</h3>
-                    <p className={styles.contactItemDesc}>
-                      {guideVideos.contactInfo?.callUsDescription || 'Entre em contacto connosco para esclarecer dúvidas ou solicitar informações sobre os nossos produtos e serviços.'}
-                    </p>
-                    {guideVideos.contactInfo?.phoneNumber && (
-                      <a href={`tel:${guideVideos.contactInfo.phoneNumber}`} className={styles.contactLink}>
-                        {guideVideos.contactInfo.phoneNumber}
-                      </a>
-                    )}
-                    {guideVideos.contactInfo?.email && (
-                      <div style={{ marginTop: 8 }}>
-                        <a href={`mailto:${guideVideos.contactInfo.email}`} className={styles.contactLink}>
-                          {guideVideos.contactInfo.email}
+      {/* Seção Combinada: Contactos e FAQ */}
+      {showActionButtons && (
+        <div className={styles.contactFaqSection}>
+          <div className={styles.contactFaqContainer}>
+            {/* Lado Esquerdo - Contactos */}
+            {(((guideVideos as any)?.contactInfo?.enabled ?? true)) && (
+              <div className={styles.contactFaqLeft}>
+                <div className={styles.contactSection}>
+                  <div className={styles.contactContainer}>
+                    {/* Título Contactos */}
+                    <div className={styles.contactHeader}>
+                      <h2 className={styles.contactTitle}>Contactos</h2>
+                    </div>
+                    
+                    {/* Retângulos de contactos em cima */}
+                    <div className={styles.contactInfo}>
+                      <div className={styles.contactItem}>
+                        <h3 className={styles.contactItemTitle}>{guideVideos.contactInfo?.callUsTitle || 'Contacte-nos'}</h3>
+                        {guideVideos.contactInfo?.callUsDescription && (
+                          <p className={styles.contactItemDesc}>
+                            {guideVideos.contactInfo.callUsDescription}
+                          </p>
+                        )}
+                        {guideVideos.contactInfo?.phoneNumber && (
+                          <a href={`tel:${guideVideos.contactInfo.phoneNumber}`} className={styles.contactLink}>
+                            {guideVideos.contactInfo.phoneNumber}
+                          </a>
+                        )}
+                        {guideVideos.contactInfo?.email && (
+                          <div style={{ marginTop: 8 }}>
+                            <a href={`mailto:${guideVideos.contactInfo.email}`} className={styles.contactLink}>
+                              {guideVideos.contactInfo.email}
+                            </a>
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className={styles.contactItem}>
+                        <h3 className={styles.contactItemTitle}>{guideVideos.contactInfo?.visitUsTitle || 'Visite-nos'}</h3>
+                        {guideVideos.contactInfo?.visitUsDescription && (
+                          <p className={styles.contactItemDesc}>
+                            {guideVideos.contactInfo.visitUsDescription}
+                          </p>
+                        )}
+                        <a href={`https://maps.google.com/?q=${encodeURIComponent(guideVideos.contactInfo?.address || 'Largo Rossio de Santa Clara, Coimbra')}`} className={styles.contactLink}>
+                          {guideVideos.contactInfo?.address || 'Largo Rossio de Santa Clara, 3040-256 Coimbra, Portugal'}
                         </a>
                       </div>
-                    )}
-                  </div>
-                  
-                  <div className={styles.contactItem}>
-                    <h3 className={styles.contactItemTitle}>{guideVideos.contactInfo?.visitUsTitle || 'Visite-nos'}</h3>
-                    <p className={styles.contactItemDesc}>
-                      {guideVideos.contactInfo?.visitUsDescription || 'Visite o nosso parque e descubra mais sobre Portugal.'}
-                    </p>
-                    <a href={`https://maps.google.com/?q=${encodeURIComponent(guideVideos.contactInfo?.address || 'Largo Rossio de Santa Clara, Coimbra')}`} className={styles.contactLink}>
-                      {guideVideos.contactInfo?.address || 'Largo Rossio de Santa Clara, 3040-256 Coimbra, Portugal'}
-                    </a>
-                  </div>
-                  
-                  <div className={styles.contactItem}>
-                    <h3 className={styles.contactItemTitle}>{guideVideos.contactInfo?.liveChatTitle || 'Chat ao Vivo'}</h3>
-                    <p className={styles.contactItemDesc}>
-                      {guideVideos.contactInfo?.liveChatDescription || 'Fale com o nosso guia virtual em tempo real.'}
-                    </p>
-                    <button 
-                      className={`${styles.contactLink} ${styles.chatButton}`}
-                      onClick={() => {
-                        // Sempre abrir o chat com AI
-                        // Fechar o chat humano se estiver aberto
-                        if (showHumanChat) {
-                          setShowHumanChat(false);
-                        }
-                        
-                        // Abrir o chatbot AI
-                        setShowChatbotPopup(true);
-                        setTimeout(() => {
-                          chatbotInputRef.current?.focus();
-                        }, 300);
-                      }}
-                    >
-                      <span style={{display: 'inline !important'}}>
-                        {guideVideos.contactInfo?.liveChatButtonText || 'FALE COM O GUIA VIRTUAL'}
-                      </span>
-                    </button>
+                      
+                    </div>
+                    
+                    {/* Mapa em baixo */}
+                    <div className={styles.mapContainer}>
+                      <iframe
+                        src={guideVideos.contactInfo?.mapEmbedUrl || ""}
+                        width="100%"
+                        height="250"
+                        style={{ border: 0 }}
+                        allowFullScreen
+                        loading="lazy"
+                        referrerPolicy="no-referrer-when-downgrade"
+                        title="Localização do Parque"
+                      ></iframe>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Lado Direito - FAQ */}
+            {faqData.length > 0 && (
+              <div className={styles.contactFaqRight}>
+                <div className={styles.faqSection}>
+                  <div className={styles.faqContainer}>
+                    <div className={styles.faqHeader}>
+                      <h2 className={styles.faqTitle}>FAQ</h2>
+                    </div>
+                    
+                    {faqData.length > 0 && (
+                    <div className={styles.faqCategories}>
+                      {faqData.map((category, index) => (
+                        <button 
+                          key={index}
+                          className={`${styles.faqCategory} ${activeCategory === index ? styles.activeCategory : ''}`}
+                          onClick={() => handleCategoryChange(index)}
+                        >
+                          {category.name}
+                        </button>
+                      ))}
+                    </div>
+                    )}
+
+                    {faqData.length > 0 && (
+                    <div className={styles.faqContent}>
+                      {faqData[activeCategory].questions.map((item, index) => (
+                        <div key={index} className={`${styles.faqItem} ${expandedFaq === index ? styles.expanded : ''}`}>
+                          <div className={styles.faqQuestion} onClick={() => handleFaqToggle(index)}>
+                            <span>{item.question}</span>
+                            <span className={styles.faqIcon}>▼</span>
+                          </div>
+                          <div className={styles.faqAnswer}>
+                            {item.answer}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* Chat Humano */}
-      {showHumanChat && (
+
+      {/* Chat Humano (desativado) */}
+      {false && showHumanChat && (
         <div className={styles.chatbotPopupOverlay}>
           <div className={styles.chatbotPopup}>
             <div className={styles.chatbotHeader}>
@@ -6056,14 +5953,25 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                 const pip = pipVideoRef.current;
                 if (!pip) return;
 
+                console.log('PiP button clicked - current pipVideoPlaying:', pipVideoPlaying);
+                console.log('PiP video paused:', pip.paused);
+
                 if (pipVideoPlaying) {
+                  console.log('PiP: Pausing video');
                   pip.pause();
                   setPipVideoPlaying(false);
                 } else {
+                  console.log('PiP: Playing video');
                   // Evitar poluir o console com AbortError quando o estado muda rápido
                   pip.play()
-                    .then(() => setPipVideoPlaying(true))
-                    .catch(() => { /* ignorar AbortError/play interrompido */ });
+                    .then(() => {
+                      console.log('PiP: Play successful - setting pipVideoPlaying to true');
+                      setPipVideoPlaying(true);
+                    })
+                    .catch((error) => { 
+                      console.log('PiP: Play failed:', error);
+                      /* ignorar AbortError/play interrompido */ 
+                    });
                 }
               }}
               aria-label={pipVideoPlaying ? "Pausar" : "Reproduzir"}
@@ -6179,6 +6087,37 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
             </div>
           </div>
         </div>
+      )}
+
+      {/* GIF pequeno fixo sem áudio */}
+      {(!showChatbotPopup && !showHumanChat && !showGuidePopup) && (
+      <div className={smallVideoStyles.fixedSmallVideo}>
+        <div className={smallVideoStyles.videoContainer} onClick={() => {
+          window.open('https://virtualguide.info/inovpartner', '_blank');
+        }} role="button" aria-label="Ir para VirtualGuide" tabIndex={0} onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            window.open('https://virtualguide.info/inovpartner', '_blank');
+          }
+        }}>
+          <img
+            src="/gifs/vertopal.com_4.apng"
+            alt="GIF Animation"
+            className={smallVideoStyles.smallVideo}
+            style={{ objectFit: 'cover', width: '100%', height: '100%' }}
+          />
+        </div>
+        <button
+          className={smallVideoStyles.chatButton}
+          onClick={() => {
+            window.open('https://virtualguide.info/inovpartner', '_blank');
+          }}
+          title="Ir para VirtualGuide"
+          aria-label="Iniciar conversa com AI"
+        >
+          Iniciar Conversa
+        </button>
+      </div>
       )}
 
     </>

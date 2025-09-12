@@ -23,6 +23,7 @@
     "express-rate-limit": "^8.0.1",
     "firebase": "^12.2.0",
     "firebase-admin": "^13.5.0",
+    "gifuct-js": "^2.1.2",
     "jsonwebtoken": "^9.0.2",
     "lottie-react": "^2.4.1",
     "lowdb": "^7.0.1",

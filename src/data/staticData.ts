@@ -192,16 +192,7 @@ Always Respond in European Portuguese
 
 [FINAL SISTEMA]`,
     isActive: true,
-    chatConfig: {
-      welcomeTitle: "BEM-VINDO À INOV PARTNER",
-      button1Text: "O que é a Inov Partner?",
-      button1Function: "Explica-me o que é a Inov Partner e os serviços que oferece.",
-      button2Text: "Serviços de IA",
-      button2Function: "Quais são os serviços de inteligência artificial que oferecem?",
-      button3Text: "Multimédia",
-      button3Function: "Que serviços de multimédia estão disponíveis?",
-      downloadVideoEnabled: true
-    },
+    chatConfig: null,
     helpPoints: {
       point1: "Faça perguntas sobre a Inov Partner",
       point2: "Peça informações sobre serviços de IA",
@@ -209,7 +200,7 @@ Always Respond in European Portuguese
       point4: "Tire dúvidas sobre projetos digitais",
       point5: "Saiba mais sobre o Virtualguide"
     },
-    humanChatEnabled: true,
+    humanChatEnabled: false,
     faq: [
       {
         name: "Geral",
@@ -312,16 +303,16 @@ Always Respond in European Portuguese
       phoneNumber: "+351 915 700 200",
       address: "Rua Álvaro Pires Miranda 270, 2415-369 Leiria",
       callUsTitle: "Contacte-nos",
-      callUsDescription: "A nossa equipa está disponível em dias úteis das 9h às 18h.",
-      visitUsTitle: "Visite-nos",
-      visitUsDescription: "A nossa sede está localizada em Leiria. Agende uma visita para conhecer os nossos serviços.",
-      liveChatTitle: "Chat em Tempo Real",
-      liveChatDescription: "Converse com um dos nossos especialistas para tirar as suas dúvidas imediatamente.",
-      liveChatButtonText: "Iniciar Chat",
+      callUsDescription: "",
+      visitUsTitle: "Morada",
+      visitUsDescription: "",
+      liveChatTitle: "Fale connosco",
+      liveChatDescription: "A nossa equipa está disponível para esclarecer as suas dúvidas.",
+      liveChatButtonText: "Contactar",
       mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3070.7559300776387!2d-8.822899323540506!3d39.74881897154771!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0xd22735905c4507f%3A0x400ebbde4902160!2sR.%20%C3%81lvaro%20Pires%20Miranda%20270%2C%202415-369%20Leiria!5e0!3m2!1spt-PT!2spt!4v1710347161099!5m2!1spt-PT!2spt",
       email: "geral@inovpartner.com"
     },
-    chatIconURL: "/iconchat.jpg",
+    chatIconURL: null,
     captions: {
       desktop: "/videos da pagina/Legendas pc.vtt",
       tablet: "/videos da pagina/Legendas Tablet.vtt",

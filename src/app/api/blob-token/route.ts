@@ -1,6 +1,4 @@
 import { NextRequest } from 'next/server';
-import { strictRateLimit } from '@/middleware/rateLimitMiddleware';
-import { simpleApiKeyAuth } from '@/middleware/simpleApiKeyMiddleware';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -22,18 +20,6 @@ const MAX_UPLOAD_SIZE = 100 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
 	try {
-		// Aplicar rate limiting rigoroso para tokens de upload
-		const rateLimitResult = await strictRateLimit()(request);
-		if (rateLimitResult) {
-			return rateLimitResult;
-		}
-		
-		// Verificar autenticação via API Key simples
-		const authResult = await simpleApiKeyAuth()(request);
-		if (authResult) {
-			return authResult;
-		}
-
 		if (!process.env.BLOB_READ_WRITE_TOKEN) {
 			return new Response(JSON.stringify({ error: 'BLOB_READ_WRITE_TOKEN não configurado' }), {
 				status: 500,

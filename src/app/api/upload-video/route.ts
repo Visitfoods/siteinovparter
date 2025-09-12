@@ -1,8 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { uploadBufferToAmen } from '@/lib/amenFtp';
 import { sanitizeGuideSlug, sanitizeFilename, isAllowedMimeType, isAllowedFileSize } from '@/utils/sanitize';
-import { strictRateLimit } from '@/middleware/rateLimitMiddleware';
-import { simpleApiKeyAuth } from '@/middleware/simpleApiKeyMiddleware';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -15,18 +13,6 @@ const MAX_FILE_SIZE = 100 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
 	try {
-		// Aplicar rate limiting mais rigoroso para uploads de vídeo
-		const rateLimitResult = await strictRateLimit()(request);
-		if (rateLimitResult) {
-			return rateLimitResult;
-		}
-		
-		// Verificar autenticação via API Key simples
-		const authResult = await simpleApiKeyAuth()(request);
-		if (authResult) {
-			return authResult;
-		}
-
 		const formData = await request.formData();
 		const file = formData.get('file') as File | null;
 		const guideSlug = (formData.get('guideSlug') || formData.get('slug')) as string | null;

@@ -1,8 +1,5 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { uploadBufferToAmen } from '@/lib/amenFtp';
-import { sanitizeGuideSlug, sanitizeFilename, isAllowedMimeType, isAllowedFileSize } from '@/utils/sanitize';
-import { standardRateLimit } from '@/middleware/rateLimitMiddleware';
-import { simpleApiKeyAuth } from '@/middleware/simpleApiKeyMiddleware';
+import { NextRequest } from 'next/server';
+import { sanitizeFilename, isAllowedMimeType, isAllowedFileSize } from '@/utils/sanitize';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -21,10 +18,10 @@ export async function OPTIONS(request: NextRequest) {
   
   // Se a origem não estiver na lista, não adicionar headers CORS
   if (!ALLOWED_ORIGINS.has(origin)) {
-    return new NextResponse(null, { status: 204 });
+    return new Response(null, { status: 204 });
   }
 
-  return new NextResponse(null, {
+  return new Response(null, {
     status: 204,
     headers: {
       'Access-Control-Allow-Origin': origin,
@@ -41,86 +38,18 @@ const ALLOWED_MIME_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
 export async function POST(request: NextRequest) {
-	try {
-		// Aplicar rate limiting
-		const rateLimitResult = await standardRateLimit()(request);
-		if (rateLimitResult) {
-			return rateLimitResult;
-		}
-		
-		// Verificar autenticação via API Key simples
-		const authResult = await simpleApiKeyAuth()(request);
-		if (authResult) {
-			return authResult;
-		}
+  try {
+    const formData = await request.formData();
+    const file = formData.get('file') as File | null;
+    if (!file) return new Response(JSON.stringify({ error: 'Ficheiro em falta' }), { status: 400 });
 
-		const formData = await request.formData();
-		const file = formData.get('file') as File | null;
-		const guideSlug = (formData.get('guideSlug') || formData.get('slug')) as string | null;
-		const fileType = (formData.get('fileType') || formData.get('type')) as string | null;
+    if (!isAllowedMimeType(file.type)) return new Response(JSON.stringify({ error: 'Tipo de ficheiro inválido' }), { status: 400 });
+    if (!isAllowedFileSize(file.size)) return new Response(JSON.stringify({ error: 'Ficheiro demasiado grande' }), { status: 400 });
 
-		if (!file || !guideSlug) {
-			return NextResponse.json(
-				{ error: 'Ficheiro e slug são obrigatórios' },
-				{ status: 400 }
-			);
-		}
-
-		// Validar tipo MIME
-		if (!isAllowedMimeType(file.type, ALLOWED_MIME_TYPES)) {
-			return NextResponse.json(
-				{ error: 'Tipo de ficheiro não permitido. Apenas imagens são permitidas.' },
-				{ status: 400 }
-			);
-		}
-
-		// Validar tamanho do ficheiro
-		if (!isAllowedFileSize(file.size, MAX_FILE_SIZE)) {
-			return NextResponse.json(
-				{ error: `Tamanho do ficheiro excede o limite máximo de ${MAX_FILE_SIZE / (1024 * 1024)}MB` },
-				{ status: 400 }
-			);
-		}
-
-		// Sanitizar slug e nome do ficheiro
-		const sanitizedSlug = sanitizeGuideSlug(guideSlug);
-		const timestamp = Date.now();
-		const sanitizedFileName = sanitizeFilename(file.name || 'image');
-		const fileName = `${fileType || 'chatIcon'}_${timestamp}_${sanitizedFileName}`;
-		const remotePath = `guides/${sanitizedSlug}/${fileName}`;
-		
-		const buffer = Buffer.from(await file.arrayBuffer());
-		const publicUrl = await uploadBufferToAmen(remotePath, buffer);
-		// Adicionar headers CORS na resposta de sucesso
-		const origin = request.headers.get('origin') || '';
-		const response = NextResponse.json(
-			{ success: true, stored: true, path: publicUrl, fileName, message: 'Imagem guardada no servidor (FTP) com sucesso' }
-		);
-
-		// Adicionar headers CORS se a origem for permitida
-		if (ALLOWED_ORIGINS.has(origin)) {
-			response.headers.set('Access-Control-Allow-Origin', origin);
-			response.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-			response.headers.set('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
-		}
-
-		return response;
-	} catch (error) {
-		// Erro ao fazer upload de imagem
-		// Adicionar headers CORS mesmo na resposta de erro
-		const origin = request.headers.get('origin') || '';
-		const errorResponse = NextResponse.json(
-			{ error: 'Erro interno do servidor ao fazer upload de imagem', details: error instanceof Error ? error.message : 'Erro desconhecido' },
-			{ status: 500 }
-		);
-
-		// Adicionar headers CORS se a origem for permitida
-		if (ALLOWED_ORIGINS.has(origin)) {
-			errorResponse.headers.set('Access-Control-Allow-Origin', origin);
-			errorResponse.headers.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-			errorResponse.headers.set('Access-Control-Allow-Headers', 'Content-Type, x-api-key');
-		}
-
-		return errorResponse;
-	}
+    const safeName = sanitizeFilename(file.name);
+    // Aqui poderias guardar em disco/externo; por agora eco simples
+    return new Response(JSON.stringify({ success: true, filename: safeName }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  } catch (e) {
+    return new Response(JSON.stringify({ error: 'Erro no upload' }), { status: 500 });
+  }
 }

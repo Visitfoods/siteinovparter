@@ -81,11 +81,12 @@ export default function StaticGuidePage({ params }: PageProps) {
               let el = document.querySelector(selector) as HTMLMetaElement | HTMLLinkElement | null;
               if (!el) {
                 const isLink = selector.startsWith('link');
-                el = document.createElement(isLink ? 'link' : 'meta') as any;
+                const created = document.createElement(isLink ? 'link' : 'meta') as HTMLMetaElement | HTMLLinkElement;
                 const attrName = selector.includes('property=') ? 'property' : selector.includes('name=') ? 'name' : 'rel';
                 const match = selector.match(/(?:property|name|rel)="([^"]+)"/);
-                el.setAttribute(attrName, match?.[1] || '');
-                document.head.appendChild(el);
+                created.setAttribute(attrName, match?.[1] || '');
+                document.head.appendChild(created);
+                el = created;
               }
               el.setAttribute(attr, value);
             };

@@ -1,11 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { 
-  createGuideConversation, 
-  sendGuideMessage, 
-  listenToGuideConversation
-} from '../../../firebase/guideServices';
+// Firebase removido
 
 interface ChatIntegrationProps {
   guideSlug: string;
@@ -31,10 +27,8 @@ export default function ChatIntegration({ guideSlug, projectId, userName, userEm
   // Escutar mudanças na conversa
   useEffect(() => {
     if (conversationId) {
-      const unsubscribe = listenToGuideConversation(projectId, conversationId, (conversation) => {
-        setMessages(conversation.messages || []);
-      });
-      return unsubscribe;
+      // Firebase removido: noop
+      return () => {};
     }
   }, [conversationId, projectId]);
 
@@ -72,7 +66,8 @@ export default function ChatIntegration({ guideSlug, projectId, userName, userEm
         ]
       };
 
-      const newConversationId = await createGuideConversation(projectId, conversationData);
+      // Firebase removido: simular ID local
+      const newConversationId = `local_${Date.now()}`;
       setConversationId(newConversationId);
       localStorage.setItem(`chat_${guideSlug}_conversation`, newConversationId);
     } catch (error) {
@@ -84,22 +79,15 @@ export default function ChatIntegration({ guideSlug, projectId, userName, userEm
     if (!newMessage.trim() || !conversationId) return;
     try {
       setIsTyping(true);
-      await sendGuideMessage(projectId, conversationId, {
-        from: 'user',
-        text: newMessage,
-        metadata: { guideResponse: false }
-      });
+      // Firebase removido: append local
+      setMessages(prev => [...prev, { from: 'user', text: newMessage, timestamp: new Date() }]);
       setNewMessage('');
       setIsTyping(false);
 
       setTimeout(async () => {
         if (conversationId) {
           const autoResponse = generateAutoResponse(newMessage);
-          await sendGuideMessage(projectId, conversationId, {
-            from: 'guide',
-            text: autoResponse,
-            metadata: { guideResponse: true }
-          });
+          setMessages(prev => [...prev, { from: 'guide', text: autoResponse, timestamp: new Date(), metadata: { guideResponse: true } }]);
         }
       }, 1000 + Math.random() * 2000);
     } catch (error) {

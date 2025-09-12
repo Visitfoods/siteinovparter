@@ -1,8 +1,6 @@
 import type { Metadata } from 'next';
 import { Montserrat } from 'next/font/google';
 import './globals.css';
-import { mainDb } from "../firebase/mainConfig";
-import { AuthProvider } from "../hooks/useAuth";
 import PrivacyBanner from "../components/PrivacyBanner";
 
 const montserrat = Montserrat({ 
@@ -42,10 +40,8 @@ export default function RootLayout({
         <link rel="canonical" href="https://virtualguide.info" />
       </head>
       <body className={`${montserrat.variable} font-montserrat`}>
-        <AuthProvider>
-          {children}
-          <PrivacyBanner />
-        </AuthProvider>
+        {children}
+        <PrivacyBanner />
       </body>
     </html>
   );

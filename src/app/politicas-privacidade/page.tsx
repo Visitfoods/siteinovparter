@@ -20,9 +20,9 @@ export default function PoliticasPrivacidade() {
           <h2>1. Dados recolhidos</h2>
           <p>Podemos recolher as seguintes categorias de dados:</p>
           <ul>
-            <li><strong>Dados fornecidos pelo utilizador:</strong> informações partilhadas no chatbot, formulários de contacto ou outros meios de comunicação.</li>
+            <li><strong>Dados fornecidos pelo utilizador:</strong> informações partilhadas em formulários de contacto ou outros meios de comunicação.</li>
             <li><strong>Dados técnicos:</strong> endereço IP, tipo de dispositivo, navegador, sistema operativo, cookies e dados de utilização do site.</li>
-            <li><strong>Dados derivados das interações com IA:</strong> mensagens enviadas ao chatbot, registos de conversação e preferências de utilização.</li>
+            <li><strong>Dados derivados da utilização do website:</strong> interações com páginas e conteúdos e preferências de utilização.</li>
           </ul>
         </section>
 
@@ -30,10 +30,9 @@ export default function PoliticasPrivacidade() {
           <h2>2. Finalidade do tratamento</h2>
           <p>Os dados pessoais são utilizados para:</p>
           <ul>
-            <li>Permitir o funcionamento do chatbot de inteligência artificial.</li>
+            <li>Assegurar o funcionamento e melhoria contínua da plataforma.</li>
             <li>Responder a pedidos de informação e prestar apoio aos utilizadores.</li>
             <li>Melhorar os nossos serviços e a experiência de utilização.</li>
-            <li>Desenvolver e treinar modelos de inteligência artificial de forma anónima e agregada.</li>
             <li>Cumprir obrigações legais ou regulamentares.</li>
           </ul>
         </section>
@@ -61,7 +60,7 @@ export default function PoliticasPrivacidade() {
         <section className={styles.section}>
           <h2>5. Conservação dos dados</h2>
           <ul>
-            <li>Os dados das conversas no chatbot poderão ser armazenados por um período limitado, apenas para efeitos de melhoria dos serviços.</li>
+            <li>Os dados de utilização do website poderão ser armazenados por um período limitado, apenas para efeitos de melhoria dos serviços.</li>
             <li>Após esse período, os dados serão eliminados ou anonimizados.</li>
             <li>O tempo de retenção pode variar conforme obrigações legais específicas.</li>
           </ul>
@@ -77,19 +76,7 @@ export default function PoliticasPrivacidade() {
           </p>
         </section>
 
-        <section className={styles.section}>
-          <h2>7. Avisos sobre a utilização do chatbot</h2>
-          <p>
-            O chatbot da Inov Partner, movido por inteligência artificial, foi desenvolvido para prestar apoio informativo e facilitar a interação dos utilizadores com os nossos serviços. No entanto, é importante ter em consideração:
-          </p>
-          <ul>
-            <li>As respostas são geradas automaticamente por um sistema de IA, podendo nem sempre ser exatas, completas ou totalmente atualizadas.</li>
-            <li>O chatbot não substitui aconselhamento profissional (jurídico, médico, financeiro ou outro).</li>
-            <li>Os utilizadores não devem partilhar dados pessoais sensíveis (como dados de saúde, informações financeiras, números de documentos oficiais ou passwords) durante a utilização do chatbot.</li>
-            <li>As interações poderão ser registadas para efeitos de melhoria do serviço, nos termos indicados nesta Política de Privacidade.</li>
-            <li>A Inov Partner não se responsabiliza pela utilização indevida das respostas fornecidas pelo chatbot.</li>
-          </ul>
-        </section>
+        
 
         <section className={styles.section}>
           <h2>8. Direitos dos titulares</h2>

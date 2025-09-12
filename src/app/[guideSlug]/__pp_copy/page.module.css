@@ -13,6 +13,16 @@
   margin: 0 auto;
 }
 
+.logosSliderTitle {
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding-top: 10px;
+}
+
 .logosSlider {
   width: 100%;
   overflow: hidden;
@@ -70,6 +80,11 @@
     padding: 0 10px;
   }
   
+  .logosSliderTitle {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+  
   .logosTrack {
     gap: 30px;
     animation: slideLogos 5s linear infinite;
@@ -88,7 +103,6 @@
 /* Seção Áreas de Negócio */
 .businessAreasSection {
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 25%, #404040 50%, #333333 75%, #262626 100%);
-  min-height: 48vh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -205,6 +219,17 @@
   overflow: visible;
 }
 
+.servicesSectionTitle {
+  text-align: left;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 2rem 0;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
 .servicesHeader {
   text-align: center;
   margin-bottom: 3rem;
@@ -260,9 +285,10 @@
   grid-row: 1;
   padding: 2.4rem;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
   background: radial-gradient(120% 120% at 10% 10%, rgba(129, 140, 248, 0.25) 0%, rgba(31, 41, 55, 0.65) 50%, rgba(12, 12, 20, 0.8) 100%);
   border: 1px solid rgba(255, 255, 255, 0.14);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
@@ -272,17 +298,80 @@
   min-height: 200px;
 }
 
-.featuredServiceCard > div:first-child {
+.featuredServiceContent {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 20px;
+  width: 100%;
+  position: relative;
+}
+
+/* Desktop: manter layout original com GIFs à direita */
+@media (min-width: 901px) {
+  .featuredServiceContent .serviceHeaderRow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+  }
+  
+  .featuredServiceContent .serviceGifsContainer {
+    position: absolute;
+    right: -40px;
+    top: -142px;
+    z-index: 2;
+  }
+}
+
+.serviceHeaderRow {
   display: flex;
   flex-direction: row;
   align-items: center;
-  flex: 1;
+  gap: 20px;
+  width: 100%;
 }
 
-.featuredServiceCard .serviceContent {
+.serviceTextContent {
   flex: 1;
-  margin-right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 30%;
+  max-width: 400px;
 }
+
+.featuredServiceCard .serviceIcon {
+  align-self: flex-start;
+  margin-bottom: 0;
+}
+
+.serviceGifsContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center;
+  position: absolute;
+  right: -40px;
+  z-index: 2;
+  top:-100px
+}
+
+.serviceGif {
+  height: 440px;
+  object-fit: cover;
+  border-radius: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  flex-shrink: 0;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+
+
 
 /* Glow roxo pulsante atrás do cartão destacado */
 .featuredServiceCard::before {
@@ -355,54 +444,265 @@
 
 /* Responsividade para equilibrar em tablet e mobile */
 @media (max-width: 1024px) {
-  .serviceIcon { width: 350px; height: 80px; }
-  .featuredServiceCard .serviceIcon { width: 350px; height: 90px; }
-  .serviceIcon img,
-  .featuredServiceCard .serviceIcon img { max-width: 350px; max-height: 55px; }
-  .serviceIcon:has(img[src*="campanha-boost"]),
-  .serviceIcon:has(img[src*="campanha-boost-72x"]),
-  .featuredServiceCard .serviceIcon:has(img[src*="campanha-boost"]),
-  .featuredServiceCard .serviceIcon:has(img[src*="campanha-boost-72x"]) { width: 350px !important; }
+  /* Tamanhos base uniformes para tablet - largura 508px */
+  .serviceIcon { 
+    width: 508px; 
+    height: 90px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
   
-  /* Aplicar estilo boost à imagem "À sua medida" em tablet */
+  .featuredServiceCard .serviceIcon { 
+    width: 508px; 
+    height: 100px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  /* Imagens com proporção uniforme em tablet - largura 508px */
+  .serviceIcon img,
+  .featuredServiceCard .serviceIcon img { 
+    max-width: 508px; 
+    max-height: 70px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  /* Ajustes proporcionais para cada ícone em tablet - baseado nas proporções naturais */
+  
+  /* Virtual Guide - ícone médio, proporção equilibrada */
+  .serviceIcon img[src*="virtualguide-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualguide-72x"] {
+    max-width: 400px;
+    max-height: 65px;
+  }
+  .serviceIcon:has(img[src*="virtualguide-72x"]),
+  .featuredServiceCard .serviceIcon:has(img[src*="virtualguide-72x"]) {
+    width: 508px;
+  }
+  
+  /* Virtual Story - ícone pequeno, ajustado para não ficar muito grande */
+  .serviceIcon img[src*="virtualstory-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualstory-72x"] {
+    max-width: 380px;
+    max-height: 55px;
+  }
+  .serviceIcon:has(img[src*="virtualstory-72x"]),
+  .featuredServiceCard .serviceIcon:has(img[src*="virtualstory-72x"]) {
+    width: 508px;
+  }
+  
+  /* Visit Postal - ícone pequeno, precisa ser maior para equilibrar */
+  .serviceIcon img[src*="visitpostal-72x"],
+  .featuredServiceCard .serviceIcon img[src*="visitpostal-72x"] {
+    max-width: 450px;
+    max-height: 70px;
+  }
+  .serviceIcon:has(img[src*="visitpostal-72x"]),
+  .featuredServiceCard .serviceIcon:has(img[src*="visitpostal-72x"]) {
+    width: 508px;
+  }
+  
+  /* Virtual Chat - ícone pequeno, precisa ser maior para equilibrar */
+  .serviceIcon img[src*="virtualchat-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualchat-72x"] {
+    max-width: 450px;
+    max-height: 70px;
+  }
+  .serviceIcon:has(img[src*="virtualchat-72x"]),
+  .featuredServiceCard .serviceIcon:has(img[src*="virtualchat-72x"]) {
+    width: 508px;
+  }
+  
+  /* Campanha Boost - ícone grande, manter proporção generosa */
+  .serviceIcon img[src*="campanha-boost"],
+  .serviceIcon img[src*="campanha-boost-72x"] {
+    max-width: 480px;
+    max-height: 75px;
+  }
+  .serviceIcon:has(img[src*="campanha-boost"]),
+  .serviceIcon:has(img[src*="campanha-boost-72x"]) {
+    width: 508px;
+  }
+  .featuredServiceCard .serviceIcon:has(img[src*="campanha-boost"]),
+  .featuredServiceCard .serviceIcon:has(img[src*="campanha-boost-72x"]) {
+    width: 508px;
+  }
+  
+  /* À sua medida - ícone maior, ajustado para não ficar muito grande */
   .serviceIcon img[src*="a-medida"],
   .serviceIcon img[src*="a-medida.png"] {
-    width: 350px !important;
-    max-height: 55px !important;
+    max-width: 420px;
+    max-height: 60px;
   }
   .serviceIcon:has(img[src*="a-medida"]),
   .serviceIcon:has(img[src*="a-medida.png"]) {
-    width: 350px !important;
+    width: 508px;
   }
   .featuredServiceCard .serviceIcon:has(img[src*="a-medida"]),
   .featuredServiceCard .serviceIcon:has(img[src*="a-medida.png"]) {
-    width: 350px !important;
+    width: 508px;
   }
 }
 
 @media (max-width: 768px) {
-  .serviceIcon { width: 300px; height: 70px; }
-  .featuredServiceCard .serviceIcon { width: 250px; height: 80px; }
-  .serviceIcon img,
-  .featuredServiceCard .serviceIcon img { max-width: 250px; max-height: 50px; }
-  .serviceIcon:has(img[src*="campanha-boost"]),
-  .serviceIcon:has(img[src*="campanha-boost-72x"]),
-  .featuredServiceCard .serviceIcon:has(img[src*="campanha-boost"]),
-  .featuredServiceCard .serviceIcon:has(img[src*="campanha-boost-72x"]) { width: 300px !important; }
+  /* Tamanhos base uniformes para mobile - ajustados para não sair do ecrã */
+  .serviceIcon { 
+    width: 90vw; 
+    max-width: 320px;
+    height: 80px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
   
-  /* Aplicar estilo boost à imagem "À sua medida" em mobile */
+  .featuredServiceCard .serviceIcon { 
+    width: 90vw; 
+    max-width: 300px;
+    height: 90px; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+  }
+  
+  /* Imagens com proporção uniforme em mobile - ajustadas para não sair do ecrã */
+  .serviceIcon img,
+  .featuredServiceCard .serviceIcon img { 
+    max-width: 300px;
+    max-height: 60px;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+  
+  /* Ajustes proporcionais para cada ícone em mobile - ajustados para não sair do ecrã */
+  
+  /* Virtual Guide - ícone médio, proporção equilibrada */
+  .serviceIcon img[src*="virtualguide-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualguide-72x"] {
+    max-width: 200px;
+    max-height: 50px;
+  }
+  
+  /* Virtual Story - ícone pequeno, ajustado para não sair do ecrã */
+  .serviceIcon img[src*="virtualstory-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualstory-72x"] {
+    max-width: 85vw;
+    max-width: 200px;
+    max-height: 50px;
+  }
+  
+  /* Visit Postal - ícone pequeno, ajustado para não sair do ecrã */
+  .serviceIcon img[src*="visitpostal-72x"],
+  .featuredServiceCard .serviceIcon img[src*="visitpostal-72x"] {
+    max-width: 220px;
+    max-height: 55px;
+  }
+  
+  /* Virtual Chat - ícone pequeno, ajustado para não sair do ecrã */
+  .serviceIcon img[src*="virtualchat-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualchat-72x"] {
+    max-width: 220px;
+    max-height: 55px;
+  }
+  
+  /* Campanha Boost - ícone grande, ajustado para não sair do ecrã */
+  .serviceIcon img[src*="campanha-boost"],
+  .serviceIcon img[src*="campanha-boost-72x"] {
+    max-width: 240px;
+    max-height: 58px;
+  }
+  .serviceIcon:has(img[src*="campanha-boost"]),
+  .serviceIcon:has(img[src*="campanha-boost-72x"]) {
+    width: 90vw;
+    max-width: 280px;
+  }
+  .featuredServiceCard .serviceIcon:has(img[src*="campanha-boost"]),
+  .featuredServiceCard .serviceIcon:has(img[src*="campanha-boost-72x"]) {
+    width: 90vw;
+    max-width: 260px;
+  }
+  
+  /* À sua medida - ícone maior, ajustado para não sair do ecrã */
   .serviceIcon img[src*="a-medida"],
   .serviceIcon img[src*="a-medida.png"] {
-    width: 190px !important;
-    max-height: 50px !important;
+    max-width: 250px;
+    max-height: 60px;
   }
   .serviceIcon:has(img[src*="a-medida"]),
   .serviceIcon:has(img[src*="a-medida.png"]) {
-    width: 300px !important;
+    width: 90vw;
+    max-width: 300px;
   }
   .featuredServiceCard .serviceIcon:has(img[src*="a-medida"]),
   .featuredServiceCard .serviceIcon:has(img[src*="a-medida.png"]) {
-    width: 300px !important;
+    width: 90vw;
+    max-width: 280px;
+  }
+}
+
+/* Regras específicas para smartphones muito pequenos */
+@media (max-width: 500px) {
+  .serviceIcon { 
+    width: 95vw; 
+    max-width: 280px;
+    height: 70px; 
+    margin: 0 auto;
+  }
+  
+  .featuredServiceCard .serviceIcon { 
+    width: 95vw; 
+    max-width: 260px;
+    height: 80px; 
+    margin: 0 auto;
+  }
+  
+  .serviceIcon img,
+  .featuredServiceCard .serviceIcon img { 
+    max-width: 250px;
+    max-height: 50px;
+  }
+  
+  /* Ajustes específicos para cada ícone em smartphones pequenos */
+  .serviceIcon img[src*="virtualguide-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualguide-72x"] {
+    max-width: 180px;
+    max-height: 45px;
+  }
+  
+  .serviceIcon img[src*="virtualstory-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualstory-72x"] {
+    max-width: 180px;
+    max-height: 45px;
+  }
+  
+  .serviceIcon img[src*="visitpostal-72x"],
+  .featuredServiceCard .serviceIcon img[src*="visitpostal-72x"] {
+    max-width: 200px;
+    max-height: 50px;
+  }
+  
+  .serviceIcon img[src*="virtualchat-72x"],
+  .featuredServiceCard .serviceIcon img[src*="virtualchat-72x"] {
+    max-width: 200px;
+    max-height: 50px;
+  }
+  
+  .serviceIcon img[src*="campanha-boost"],
+  .serviceIcon img[src*="campanha-boost-72x"] {
+    max-width: 220px;
+    max-height: 52px;
+  }
+  
+  .serviceIcon img[src*="a-medida"],
+  .serviceIcon img[src*="a-medida.png"] {
+    max-width: 220px;
+    max-height: 55px;
   }
 }
 
@@ -456,22 +756,6 @@
   transition: transform 0.3s ease;
 }
 
-.featuredServiceCard .serviceLottie {
-  width: 300px;
-  height: 220px;
-  margin-top: 0;
-  margin-left: 20px;
-  flex-shrink: 0;
-  overflow: visible;
-  position: relative;
-  z-index: 10;
-  transform: scale(1.7);
-  transform-origin: center right;
-  margin-right: -104px;
-  padding-bottom: 30px;
-  padding-left: 35px;
-}
-
 
 
 
@@ -479,6 +763,11 @@
 @media (max-width: 1024px) {
   .servicesSection { padding: 40px 16px; min-height: auto; }
   .servicesContainer { padding: 0 10px; }
+  
+  .servicesSectionTitle {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+  }
   .servicesGrid { grid-template-columns: 1fr; gap: 16px; }
   .servicesTopRow { grid-template-columns: 1fr; }
   .servicesBottomRow { grid-template-columns: 1fr; }
@@ -487,37 +776,91 @@
     grid-row: auto; 
     display: flex;
     flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+    text-align: left;
     overflow: hidden;
   }
-  .featuredServiceCard > div:first-child {
+  .featuredServiceContent {
     flex-direction: column;
     align-items: center;
-    margin-right: 0;
+    gap: 15px;
+    width: 100%;
   }
-  .featuredServiceCard .serviceContent {
-    margin-right: 0;
-    margin-bottom: 20px;
+  .serviceHeaderRow {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
   }
   .featuredServiceCard .serviceIcon {
-    width: 180px;
+    width: 100%;
     height: 80px;
-    margin: 0 auto 20px auto;
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: stretch;
   }
-  .featuredServiceCard .serviceLottie {
+  .serviceGifsContainer {
+    gap: 8px;
+    margin-top: 0;
+    position: static;
+    bottom: auto;
+    right: auto;
+    margin-top: 15px;
     width: 100%;
-    height: 200px;
-    margin: 0;
-    transform: scale(1);
-    margin-right: 0;
-    padding-bottom: 0;
+    justify-content: center;
   }
-  .featuredServiceCard .serviceLottie:hover {
-    transform: scale(1.05);
+  .serviceGif {
+    width: 120px;
+    height: 185px;
+  }
+  
+  /* Reorganizar elementos para mobile: 1) ícone+título, 2) texto, 3) gifs */
+  .featuredServiceContent {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .featuredServiceContent .serviceHeaderRow {
+    order: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .featuredServiceContent .serviceHeaderRow .serviceIcon {
+    width: auto;
+    height: 80px;
+    flex-shrink: 0;
+  }
+  
+  .featuredServiceContent .serviceTitle {
+    order: 2;
+    text-align: center;
+    width: 100%;
+    margin: 10px 0;
+  }
+  
+  .featuredServiceContent .serviceTextContent {
+    order: 3;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .featuredServiceContent .serviceGifsContainer {
+    order: 4;
+    position: static;
+    margin-top: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: nowrap;
+    margin-bottom: -25px;
   }
   .serviceCard { 
     padding: 1.5rem; 
@@ -526,28 +869,31 @@
     align-items: center;
     text-align: center;
   }
-  .serviceIcon { 
-    width: 180px; 
-    height: 80px; 
-    margin: 0 auto 20px auto; 
-    padding: 8px; 
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .serviceIcon img {
-    width: 150px;
-    height: auto;
-  }
+  /* Regras de .serviceIcon removidas - usando as regras da linha 446 */
   .serviceTitle {
     text-align: center;
+    margin: auto!important;
   }
   .serviceDescription {
     text-align: center;
   }
 }
-
 @media (max-width: 768px) {
+  .serviceTextContent {
+    flex: 1 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    max-width: 400px;
+  }
+  
+  .logosSliderTitle {
+    font-size: 1rem;
+    margin-bottom: 5px;
+  }
+  
   .servicesSection { 
     padding: 30px 12px; 
     min-height: auto; 
@@ -555,23 +901,97 @@
   .servicesContainer { 
     padding: 0 5px; 
   }
+  
+  .servicesSectionTitle {
+    font-size: 1.8rem;
+    margin-bottom: 1.2rem;
+    letter-spacing: 1px;
+  }
   .featuredServiceCard {
     padding: 1.5rem;
     min-height: auto;
   }
+  .featuredServiceContent {
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+  }
+  .serviceHeaderRow {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
   .featuredServiceCard .serviceIcon {
-    width: 160px;
+    width: 100%;
     height: 70px;
-    margin: 0 auto 15px auto;
+    margin: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    align-self: stretch;
   }
-  .featuredServiceCard .serviceIcon img {
-    width: 120px;
+  /* Regra conflituosa removida - usando regras específicas da linha 551 */
+  .serviceGifsContainer {
+    gap: 6px;
+    margin-top: 0;
+    position: static;
+    bottom: auto;
+    right: auto;
+    margin-top: 12px;
+    width: 100%;
+    justify-content: center;
   }
-  .featuredServiceCard .serviceLottie {
-    height: 150px;
+  .serviceGif {
+    width: 100px;
+  }
+  
+  /* Reorganizar elementos para tablet: 1) ícone+título, 2) texto, 3) gifs */
+  .featuredServiceContent {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .featuredServiceContent .serviceHeaderRow {
+    order: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+  }
+  
+  .featuredServiceContent .serviceHeaderRow .serviceIcon {
+    width: auto;
+    height: 70px;
+    flex-shrink: 0;
+  }
+  
+  .featuredServiceContent .serviceTitle {
+    order: 2;
+    text-align: center;
+    width: 100%;
+    margin: 10px 0;
+  }
+  
+  .featuredServiceContent .serviceTextContent {
+    order: 3;
+    width: 100%;
+    text-align: center;
+  }
+  
+  .featuredServiceContent .serviceGifsContainer {
+    order: 4;
+    position: static;
+    margin-top: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+    margin-bottom: -25px;
   }
   .serviceCard { 
     padding: 1.2rem; 
@@ -581,9 +1001,7 @@
     height: 60px; 
     margin: 0 auto 15px auto; 
   }
-  .serviceIcon img {
-    width: 120px;
-  }
+  /* Regra conflituosa removida - usando regras específicas da linha 551 */
   .serviceTitle {
     font-size: 1.2rem;
     margin-bottom: 0.8rem;
@@ -871,6 +1289,16 @@ a.secondary {
 }
 
 @media (max-width: 600px) {
+  .serviceTextContent {
+    flex: 1 1;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    width: 100%;
+    max-width: 400px;
+  }
+  
   .page {
     padding: 32px;
     padding-bottom: 80px;
@@ -1245,7 +1673,6 @@ a.secondary {
   z-index: 0 !important;
   overflow: hidden !important;
 }
-
 /* Prender controlos ao fundo do container do vídeo após iniciar */
 .bgVideoContainer.started .glassmorphismControlBar,
 .bgVideoContainer.started .fixedBottomContainer {
@@ -1265,6 +1692,26 @@ a.secondary {
   bottom: 0;
   width: 100%;
   z-index: 20000;
+}
+
+/* Hide header video controls on mobile/tablet */
+@media screen and (max-width: 1024px) {
+  .glassmorphismControlBar,
+  .page-module___8aEwW__glassmorphismControlBar {
+    display: none !important;
+    pointer-events: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Pausar vídeo de fundo em mobile/tablet */
+  .bgVideo {
+    pointer-events: none !important;
+  }
+  
+  /* Garantir que o vídeo de fundo não reproduz automaticamente em mobile/tablet */
+  .bgVideoContainer .bgVideo {
+    animation-play-state: paused !important;
+  }
 }
 
 /*@media (max-width: 1024px) {
@@ -1304,6 +1751,211 @@ a.secondary {
   transition: width 0.3s ease, left 0.3s ease;
   object-fit: cover;
   object-position: center;
+}
+
+/* Gradiente animado de fundo - igual ao card virtuguide.info */
+.animatedGradientBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100svh;
+  background: #000000; /* Fundo preto base */
+  z-index: -2;
+}
+
+.animatedGradientBackground::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(closest-side, rgba(168, 85, 247, 0.45), rgba(168, 85, 247, 0.16), transparent 70%);
+  filter: blur(40px);
+  z-index: -1;
+  animation: vgPulseGlow 3.2s ease-in-out infinite;
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 0%;
+  }
+  25% {
+    background-position: 100% 0%;
+  }
+  50% {
+    background-position: 100% 100%;
+  }
+  75% {
+    background-position: 0% 100%;
+  }
+  100% {
+    background-position: 0% 0%;
+  }
+}
+
+/* Container das imagens de banner */
+.bannerImagesContainer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}
+
+/* Imagens de banner - posicionadas como na imagem original */
+.bannerImage1,
+.bannerImage2 {
+  position: absolute;
+  max-width: 40%;
+  max-height: 60%;
+  object-fit: contain;
+  opacity: 0.8;
+  animation: floatBanner 8s ease-in-out infinite;
+  transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), max-width 1.2s cubic-bezier(0.4, 0, 0.2, 1), max-height 1.2s cubic-bezier(0.4, 0, 0.2, 1), left 1.2s cubic-bezier(0.4, 0, 0.2, 1), right 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mao2.png - mão neon à esquerda (frame quadrado) */
+.bannerImage1 {
+  top: 50%;
+  left: 15%;
+  transform: translateY(-50%);
+  animation-delay: 0s;
+}
+
+/* Mao.png - mão natural à direita (frame redondo) */
+.bannerImage2 {
+  top: 50%;
+  right: 15%;
+  transform: translateY(-50%);
+  animation-delay: 4s;
+}
+
+/* Efeito de aproximação durante o scroll */
+.bannerImagesContainer.scrolled .bannerImage1 {
+  left: 25%;
+  max-width: 50%;
+  max-height: 70%;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.bannerImagesContainer.scrolled .bannerImage2 {
+  right: 25%;
+  max-width: 50%;
+  max-height: 70%;
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Texto "BE A PARTNER" */
+.bannerText {
+  position: absolute;
+  bottom: 25%;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 2.5rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 2px;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  z-index: 2;
+  animation: textGlow 3s ease-in-out infinite alternate;
+}
+
+@keyframes textGlow {
+  0% {
+    text-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+  }
+  100% {
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.8), 0 0 40px rgba(255, 0, 255, 0.3);
+  }
+}
+
+@keyframes floatBanner {
+  0%, 100% {
+    transform: translateY(-50%) translateX(0px) rotate(0deg);
+    opacity: 0.8;
+  }
+  25% {
+    transform: translateY(-50%) translateX(5px) rotate(1deg);
+    opacity: 0.9;
+  }
+  50% {
+    transform: translateY(-50%) translateX(-3px) rotate(-0.5deg);
+    opacity: 0.85;
+  }
+  75% {
+    transform: translateY(-50%) translateX(3px) rotate(0.5deg);
+    opacity: 0.9;
+  }
+}
+
+/* Responsividade para mobile */
+@media (max-width: 768px) {
+  .bannerImage1,
+  .bannerImage2 {
+    max-width: 65%;
+    max-height: 85%;
+  }
+  
+  .bannerImage1 {
+    left: 0%;
+  }
+  
+  .bannerImage2 {
+    right: 0%;
+  }
+  
+  .bannerText {
+    font-size: 1.8rem;
+    bottom: 30%;
+    letter-spacing: 1px;
+  }
+
+  /* Efeito de aproximação em mobile */
+  .bannerImagesContainer.scrolled .bannerImage1 {
+    left: 18%;
+    max-width: 70%;
+    max-height: 90%;
+  }
+
+  .bannerImagesContainer.scrolled .bannerImage2 {
+    right: 18%;
+    max-width: 70%;
+    max-height: 90%;
+  }
+}
+
+@media (max-width: 480px) {
+  .bannerImage1,
+  .bannerImage2 {
+    max-width: 50%;
+    max-height: 80%;
+  }
+  
+  .bannerText {
+    font-size: 1.5rem;
+    bottom: 35%;
+  }
+
+  /* Efeito de aproximação em mobile pequeno */
+  .bannerImagesContainer.scrolled .bannerImage1 {
+    left: 16%;
+    max-width: 65%;
+    max-height: 90%;
+  }
+
+  .bannerImagesContainer.scrolled .bannerImage2 {
+    right: 16%;
+    max-width: 65%;
+    max-height: 90%;
+  }
 }
 
 .chatOverlay {
@@ -1840,7 +2492,6 @@ a.secondary {
   margin: 0 0 20px 0;
   line-height: 1.5;
 }
-
 .guideForm {
   display: flex;
   flex-direction: column;
@@ -2611,7 +3262,6 @@ a.secondary {
   height: 16px;
   transition: all 0.2s ease;
 }
-
 /* Regras responsivas para PiP */
 @media (max-width: 480px) {
   .pipVideoContainer {
@@ -2949,6 +3599,7 @@ a.secondary {
 .chatbotOpen ~ .logosSliderSection,
 .chatbotOpen ~ .servicesSection,
 .chatbotOpen ~ .businessAreasSection,
+.chatbotOpen ~ .contactFaqSection,
 .chatbotOpen ~ .faqSection,
 .chatbotOpen ~ .contactSection,
 .chatbotOpen .fixedActionBar {
@@ -2961,6 +3612,7 @@ a.secondary {
 .humanChatOpen ~ .logosSliderSection,
 .humanChatOpen ~ .servicesSection,
 .humanChatOpen ~ .businessAreasSection,
+.humanChatOpen ~ .contactFaqSection,
 .humanChatOpen ~ .faqSection,
 .humanChatOpen ~ .contactSection,
 .humanChatOpen .fixedActionBar {
@@ -3395,7 +4047,6 @@ a.secondary {
     text-align: right;
 }
 }
-
 /* Em dispositivos muito pequenos, reduzir ainda mais o tamanho da fonte */
 @media (max-width: 480px) {
   .chatbotWelcome h3 {
@@ -4153,7 +4804,6 @@ a.secondary {
     letter-spacing: -0.2px;
   }
 }
-
 @media (max-width: 500px) {
   .chatbotPopup {
     width: 100vw;
@@ -4944,7 +5594,6 @@ a.secondary {
   margin-bottom: 40px;
   position: relative; /* Default position for desktop */
 }
-
 /* Regra específica para mobile e tablets com maior especificidade */
 @media screen and (max-width: 1024px) {
   .bgVideoContainer .searchInputContainer,
@@ -5051,9 +5700,10 @@ a.secondary {
   left: 0;
   width: 100%;
   background: #000000;
-  z-index: 2000;
+  z-index: 30000 !important; /* Z-index muito alto para garantir que fica por cima de tudo */
   padding: 13px 0;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  isolation: isolate; /* Criar novo contexto de empilhamento */
 }
 
 /* Desktop: Ajustar barra de bandeiras quando chat está aberto - apenas em ecrãs muito grandes */
@@ -5062,6 +5712,9 @@ a.secondary {
   .humanChatOpen .flagsBar {
     width: 30% !important;
     left: 0 !important;
+    position: fixed !important; /* Manter posicionamento fixo */
+    top: 0 !important; /* Manter no topo */
+    z-index: 30000 !important; /* Manter z-index alto */
   }
 }
 
@@ -5069,6 +5722,21 @@ a.secondary {
 .chatbotOpen .backToChatButton,
 .humanChatOpen .backToChatButton {
   display: none !important;
+}
+
+/* Em mobile e tablet, quando os chats estão abertos, manter a barra de idiomas em toda a largura */
+@media (max-width: 1199px) {
+  .chatbotOpen .flagsBar,
+  .humanChatOpen .flagsBar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    width: 100% !important;
+    z-index: 30000 !important;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
 }
 
 .flagsContainer {
@@ -5082,6 +5750,7 @@ a.secondary {
   position: relative;
   padding-left: 25px;
   padding-right: 25px;
+  z-index: 30001; /* Z-index ainda mais alto que a barra */
 }
 
 /* Estilos para o logo */
@@ -5093,11 +5762,22 @@ a.secondary {
 }
 
 .logoImage {
-  height: 34px;
+  height: 54px;
   width: auto;
   object-fit: contain;
   filter: brightness(0) invert(1); /* Torna a imagem branca */
   padding-left: 25px;
+}
+
+/* Ajuste do logo na barra preta para smartphone e tablet */
+@media (max-width: 1024px) {
+  .logoImage {
+    height: 44px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    padding-left: 25px;
+  }
 }
 
 /* Colocar as bandeiras do lado direito quando os chats estão fechados */
@@ -5248,27 +5928,78 @@ a.secondary {
   }
 }
 
-/* Seção FAQ */
-.faqSection {
+/* Seção Combinada: Contactos e FAQ */
+.contactFaqSection {
+  padding: 60px 20px;
   background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 25%, #404040 50%, #333333 75%, #262626 100%);
-  min-height: 80vh;
-  padding: 25px 0;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   z-index: 1;
+  margin-top: 0;
   width: 100%;
   transition: opacity 0.3s ease, visibility 0.3s ease;
 }
 
+.contactFaqContainer {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: start;
+  min-height: 700px;
+  grid-template-rows: 1fr;
+}
+
+.contactFaqLeft {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 700px;
+}
+
+.contactFaqRight {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 700px;
+}
+
+/* Seção FAQ */
+.faqSection {
+  background: transparent;
+  min-height: auto;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
 .faqContainer {
-  max-width: 1200px;
+  max-width: 100%;
   width: 100%;
   background: rgba(20, 20, 20, 0.95);
   border-radius: 16px;
   padding: 40px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  height: 100%;
+  min-height: 700px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .faqHeader {
@@ -5401,9 +6132,54 @@ a.secondary {
 
 /* Responsividade para FAQ */
 @media (max-width: 1024px) {
+  .contactFaqSection {
+    padding: 40px 16px;
+    min-height: auto;
+  }
+  
+  .contactFaqContainer {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    min-height: auto;
+  }
+  
+  .contactFaqLeft,
+  .contactFaqRight {
+    height: auto;
+    min-height: auto;
+  }
+  
+  .contactContainer,
+  .faqContainer {
+    min-height: auto;
+  }
+  
+  .mapContainer {
+    height: 300px;
+  }
+  
+  .contactInfo {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .contactItem {
+    min-width: 100%;
+    width: 100%;
+    margin-right: 0;
+  }
+  
+  .contactItem:nth-child(2n) {
+    margin-right: 0;
+  }
+  
+  .contactItem:last-child {
+    margin-right: 0;
+  }
+  
   .faqSection {
-    padding: 30px 16px;
-    min-height: 60vh;
+    padding: 0;
+    min-height: auto;
   }
   
   .faqContainer {
@@ -5411,6 +6187,10 @@ a.secondary {
   }
   
   .faqTitle {
+    font-size: 1.8rem;
+  }
+  
+  .contactTitle {
     font-size: 1.8rem;
   }
   
@@ -5428,10 +6208,55 @@ a.secondary {
   }
 }
 
+@media (max-width: 768px) {
+  .contactFaqSection {
+    padding: 30px 12px;
+    min-height: auto;
+  }
+  
+  .contactFaqContainer {
+    grid-template-columns: 1fr;
+    gap: 20px;
+    min-height: auto;
+  }
+  
+  .contactFaqLeft,
+  .contactFaqRight {
+    height: auto;
+    min-height: auto;
+  }
+  
+  .contactContainer,
+  .faqContainer {
+    min-height: auto;
+  }
+  
+  .mapContainer {
+    height: 250px;
+  }
+  
+  .contactInfo {
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  .contactItem {
+    min-width: 100%;
+    margin-right: 0;
+    padding: 12px;
+    width: 100%;
+  }
+}
+
 @media (max-width: 500px) {
-  .faqSection {
+  .contactFaqSection {
     padding: 20px 12px;
-    min-height: 50vh;
+    min-height: auto;
+  }
+  
+  .faqSection {
+    padding: 0;
+    min-height: auto;
   }
   
   .faqContainer {
@@ -5439,6 +6264,10 @@ a.secondary {
   }
   
   .faqTitle {
+    font-size: 1.6rem;
+  }
+  
+  .contactTitle {
     font-size: 1.6rem;
   }
   
@@ -5468,12 +6297,12 @@ a.secondary {
 
 /* Seção de Contacto */
 .contactSection {
-  padding: 60px 20px;
-  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 25%, #404040 50%, #333333 75%, #262626 100%);
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 0;
+  background: transparent;
+  min-height: auto;
+  display: block;
+  align-items: stretch;
+  justify-content: flex-start;
   position: relative;
   z-index: 1;
   width: 100%;
@@ -5481,24 +6310,30 @@ a.secondary {
 }
 
 .contactContainer {
-  max-width: 1200px;
+  max-width: 100%;
   width: 100%;
   background: rgba(20, 20, 20, 0.95);
   border-radius: 16px;
-  padding: 40px;
+  padding: 20px;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 700px;
+  flex: 1;
 }
 
 .contactHeader {
-  text-align: left;
+  text-align: center;
   margin-bottom: 40px;
 }
 
 .contactTitle {
-  font-size: 2.5rem;
+  font-size: 2rem;
   font-weight: 700;
   color: #ffffff;
-  margin: 0;
+  margin: 0 0 8px 0;
+  white-space: nowrap;
 }
 
 .contactContent {
@@ -5514,13 +6349,15 @@ a.secondary {
 
 .mapContainer {
   width: 100%;
-  height: 400px;
+  height: 350px;
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: 20px;
+  flex-shrink: 0;
 }
 
 .mapContainer iframe {
@@ -5537,16 +6374,34 @@ a.secondary {
 
 .contactInfo {
   display: flex;
-  flex-direction: column;
-  gap: 30px;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+  align-items: stretch;
 }
 
 .contactItem {
   background: rgba(40, 40, 40, 0.8);
   border-radius: 12px;
-  padding: 24px;
+  padding: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: calc(33.333% - 10px);
+  min-height: 150px;
+  overflow: hidden;
+  word-wrap: break-word;
+}
+
+.contactItem:last-child {
+  margin-right: 0;
+}
+
+.contactItemDesc {
+  flex-grow: 1;
+  margin-bottom: 16px;
 }
 
 .contactItemTitle {
@@ -5573,12 +6428,15 @@ a.secondary {
   border: none;
   cursor: pointer;
   padding: 0;
+  word-break: break-all;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  max-width: 100%;
 }
 
 .contactLink:hover {
   color: #cb3c58;
 }
-
 .chatButton {
   background: linear-gradient(90deg,rgba(155, 42, 136, 1) 0%, rgba(158, 58, 176, 1) 51%, rgba(107, 14, 96, 1) 100%);
   color: #ffffff !important;
@@ -5641,7 +6499,7 @@ a.secondary {
   }
   
   .contactItem {
-    padding: 20px;
+    padding: 12px;
   }
   
   .contactItemTitle {
@@ -6373,9 +7231,6 @@ a.secondary {
   transform: translateY(0);
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
 }
-
-
-
 .footerLinks {
   display: flex;
   gap: 20px;
@@ -6744,6 +7599,15 @@ body:has(.guidePopupOverlay) {
     left: 50% !important;
     transform: translateX(-50%) !important;
   }
+}
+
+/* Input de pesquisa removido: ocultar classes associadas */
+.searchInputContainer,
+.searchInputWrapper,
+.searchInput,
+.searchButton,
+.chatInputIcon {
+  display: none !important;
 }
 
 /* Sobrescrever todas as regras do botão "Falar com Guia Real" */
@@ -7161,8 +8025,6 @@ body:has(.guidePopupOverlay) {
     transform: scale(1) translateY(0) rotate(0deg);
   }
 }
-
-
 .backToChatButton:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 20px rgba(81, 174, 205, 0.6);
@@ -7696,6 +8558,3 @@ body:has(.guidePopupOverlay) {
     }
   }
 }
-
-
-
