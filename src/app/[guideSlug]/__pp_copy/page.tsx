@@ -6,6 +6,8 @@ import { useSanitizedHtml } from "@/utils/htmlSanitizer";
 import MobileOptimizedVideo from "../../../components/MobileOptimizedVideo";
 import PiPOptimizedVideo from "../../../components/PiPOptimizedVideo";
 import { useVideoOptimization, usePiPOptimization } from "../../../hooks/useVideoOptimization";
+import { useTranslations } from "../../../hooks/useTranslations";
+import { faqTranslations, FaqLanguage } from "../../../data/faqTranslations";
 
 import Image from "next/image";
 import Lottie from "lottie-react";
@@ -392,6 +394,32 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
   // Hooks de otimização
   const videoOptimization = useVideoOptimization();
   const pipOptimization = usePiPOptimization();
+  
+  // Hook de traduções
+  const { currentLanguage, changeLanguage, t } = useTranslations();
+  
+  // Função para traduzir categorias da FAQ
+  const translateFaqCategory = (categoryName: string): string => {
+    switch (categoryName) {
+      case 'Geral': return t('faqGeneral');
+      case 'Técnico': return t('faqTechnical');
+      case 'Implementação': return t('faqImplementation');
+      case 'Serviços': return t('faqServices');
+      default: return categoryName;
+    }
+  };
+  
+  // Função para traduzir perguntas da FAQ
+  const translateFaqQuestion = (question: string): string => {
+    const translations = faqTranslations[currentLanguage as FaqLanguage];
+    return translations?.questions[question as keyof typeof translations.questions] || question;
+  };
+  
+  // Função para traduzir respostas da FAQ
+  const translateFaqAnswer = (answer: string): string => {
+    const translations = faqTranslations[currentLanguage as FaqLanguage];
+    return translations?.answers[answer as keyof typeof translations.answers] || answer;
+  };
   
   // Aplicar otimizações baseadas na performance do dispositivo
   const getVideoClassName = (baseClass: string) => {
@@ -4506,12 +4534,24 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
   }
 
   // Handlers para as bandeiras
-  function handleFlagClick(country: string) {
-    if (country !== 'portugal') {
-      // Armazenar a língua selecionada no localStorage
-      localStorage.setItem('selectedLanguage', country);
-      window.location.href = '/coming-soon';
+  function handleFlagClick(country: string, event?: React.MouseEvent) {
+    console.log('🚩 Bandeira clicada:', country);
+    
+    // Prevenir comportamento padrão
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
     }
+    
+    // Limpar localStorage para evitar conflitos
+    localStorage.removeItem('selectedLanguage');
+    
+    // Mudar idioma usando o sistema de tradução
+    changeLanguage(country as any);
+    
+    // NUNCA redirecionar - apenas mudar idioma
+    console.log('✅ Idioma mudado para:', country);
+    console.log('✅ NÃO redirecionando para coming-soon');
   }
 
   // Função utilitária para formatar timestamps do Firestore
@@ -4645,20 +4685,20 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
               title="Voltar ao chat"
               aria-label="Voltar ao chat"
             >
-              <span className={styles.buttonText}>voltar conversa</span>
+              <span className={styles.buttonText}>{t('backToChat')}</span>
             </button>
           )}
           <div className={styles.flagsGroup}>
-            <div className={styles.flagItem} onClick={() => handleFlagClick('portugal')}>
+            <div className={styles.flagItem} onClick={(e) => handleFlagClick('portugal', e)}>
               <PortugalFlag />
             </div>
-            <div className={styles.flagItem} onClick={() => handleFlagClick('england')}>
+            <div className={styles.flagItem} onClick={(e) => handleFlagClick('england', e)}>
               <EnglandFlag />
             </div>
-            <div className={styles.flagItem} onClick={() => handleFlagClick('spain')}>
+            <div className={styles.flagItem} onClick={(e) => handleFlagClick('spain', e)}>
               <SpainFlag />
             </div>
-            <div className={styles.flagItem} onClick={() => handleFlagClick('france')}>
+            <div className={styles.flagItem} onClick={(e) => handleFlagClick('france', e)}>
               <FranceFlag />
             </div>
           </div>
@@ -5341,7 +5381,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
       {showActionButtons && (
         <div className={styles.logosSliderSection}>
           <div className={styles.logosSliderContainer}>
-            <h3 className={styles.logosSliderTitle}>Parceiros</h3>
+            <h3 className={styles.logosSliderTitle}>{t('partnersTitle')}</h3>
             <div className={styles.logosSlider}>
                 <div className={styles.logosTrack}>
                   <div className={styles.logoItem}>
@@ -5445,7 +5485,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
       {showActionButtons && (
         <div className={styles.servicesSection}>
           <div className={styles.servicesContainer}>
-            <h2 className={styles.servicesSectionTitle}>Serviços</h2>
+            <h2 className={styles.servicesSectionTitle}>{t('servicesTitle')}</h2>
             <div className={styles.servicesGrid}>
               {/* Linha superior - Virtual Guide destacado */}
               <div className={styles.servicesTopRow}>
@@ -5456,10 +5496,10 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                         <img src="/icons-dos-servicos/virtualguide-72x.png" alt="Virtual Guide" />
                       </div>
                     </div>
-                    <h3 className={styles.serviceTitle}>VIRTUAL GUIDE.INFO</h3>
+                    <h3 className={styles.serviceTitle}>{t('virtualGuideTitle')}</h3>
                     <div className={styles.serviceTextContent}>
                       <p className={styles.serviceDescription}>
-                        Guia virtual, movido em AI, que orienta os utilizadores na exploração de locais, produtos ou serviços de forma interativa.
+                        {t('virtualGuideDesc')}
                       </p>
                     </div>
                     <div className={styles.serviceGifsContainer}>
@@ -5477,36 +5517,36 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                   <div className={styles.serviceIcon}>
                     <img src="/icons-dos-servicos/virtualstory-72x.png" alt="Virtual Story" />
                   </div>
-                  <h3 className={styles.serviceTitle}>VIRTUAL STORY.INFO</h3>
+                  <h3 className={styles.serviceTitle}>{t('virtualStoryTitle')}</h3>
                   <p className={styles.serviceDescription}>
-                    Vídeos históricos e biográficos criados com AI que permitem contar a história de uma marca, localidade, pessoa ou empresa.
+                    {t('virtualStoryDesc')}
                   </p>
                 </div>
                 <div className={styles.serviceCard}>
                   <div className={styles.serviceIcon}>
                     <img src="/icons-dos-servicos/visitpostal-72x.png" alt="Visit Postal" />
                   </div>
-                  <h3 className={styles.serviceTitle}>VISIT POSTAL.INFO</h3>
+                  <h3 className={styles.serviceTitle}>{t('visitPostalTitle')}</h3>
                   <p className={styles.serviceDescription}>
-                    Postal turístico em papel e digital que permite a apresentação de conteúdos multimédia criados com AI.
+                    {t('visitPostalDesc')}
                   </p>
                 </div>
                 <div className={styles.serviceCard}>
                   <div className={styles.serviceIcon}>
                     <img src="/icons-dos-servicos/campanha-boost-72x.png" alt="Campanha Boost" />
                   </div>
-                  <h3 className={styles.serviceTitle}>CAMPANHA BOOST</h3>
+                  <h3 className={styles.serviceTitle}>{t('campanhaBoostTitle')}</h3>
                   <p className={styles.serviceDescription}>
-                    Campanha publicitária para aumentar a visibilidade nas redes sociais através de conteúdos multimédia criados com AI.
+                    {t('campanhaBoostDesc')}
                   </p>
                 </div>
                 <div className={styles.serviceCard}>
                   <div className={styles.serviceIcon}>
                     <img src="/icons-dos-servicos/a-medida.png" alt="Personalizado" />
                   </div>
-                  <h3 className={styles.serviceTitle}>PERSONALIZADO</h3>
+                  <h3 className={styles.serviceTitle}>{t('personalizadoTitle')}</h3>
                   <p className={styles.serviceDescription}>
-                    Soluções personalizadas, criadas com base em AI, que se adaptam às necessidades específicas de cada cliente.
+                    {t('personalizadoDesc')}
                   </p>
                 </div>
               </div>
@@ -5544,13 +5584,13 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                   <div className={styles.contactContainer}>
                     {/* Título Contactos */}
                     <div className={styles.contactHeader}>
-                      <h2 className={styles.contactTitle}>Contactos</h2>
+                      <h2 className={styles.contactTitle}>{t('contactSectionTitle')}</h2>
                     </div>
                     
                     {/* Retângulos de contactos em cima */}
                     <div className={styles.contactInfo}>
                       <div className={styles.contactItem}>
-                        <h3 className={styles.contactItemTitle}>{guideVideos.contactInfo?.callUsTitle || 'Contacte-nos'}</h3>
+                        <h3 className={styles.contactItemTitle}>{t('contactUsTitle')}</h3>
                         {guideVideos.contactInfo?.callUsDescription && (
                           <p className={styles.contactItemDesc}>
                             {guideVideos.contactInfo.callUsDescription}
@@ -5571,7 +5611,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                       </div>
                       
                       <div className={styles.contactItem}>
-                        <h3 className={styles.contactItemTitle}>{guideVideos.contactInfo?.visitUsTitle || 'Visite-nos'}</h3>
+                        <h3 className={styles.contactItemTitle}>{t('addressTitle')}</h3>
                         {guideVideos.contactInfo?.visitUsDescription && (
                           <p className={styles.contactItemDesc}>
                             {guideVideos.contactInfo.visitUsDescription}
@@ -5608,7 +5648,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                 <div className={styles.faqSection}>
                   <div className={styles.faqContainer}>
                     <div className={styles.faqHeader}>
-                      <h2 className={styles.faqTitle}>FAQ</h2>
+                      <h2 className={styles.faqTitle}>{t('faqSectionTitle')}</h2>
                     </div>
                     
                     {faqData.length > 0 && (
@@ -5619,7 +5659,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                           className={`${styles.faqCategory} ${activeCategory === index ? styles.activeCategory : ''}`}
                           onClick={() => handleCategoryChange(index)}
                         >
-                          {category.name}
+                          {translateFaqCategory(category.name)}
                         </button>
                       ))}
                     </div>
@@ -5630,11 +5670,11 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
                       {faqData[activeCategory].questions.map((item, index) => (
                         <div key={index} className={`${styles.faqItem} ${expandedFaq === index ? styles.expanded : ''}`}>
                           <div className={styles.faqQuestion} onClick={() => handleFaqToggle(index)}>
-                            <span>{item.question}</span>
+                            <span>{translateFaqQuestion(item.question)}</span>
                             <span className={styles.faqIcon}>▼</span>
                           </div>
                           <div className={styles.faqAnswer}>
-                            {item.answer}
+                            {translateFaqAnswer(item.answer)}
                           </div>
                         </div>
                       ))}
@@ -6115,7 +6155,7 @@ export default function Home({ guideVideos, guideSlug, onShowActionButtonsChange
           title="Ir para VirtualGuide"
           aria-label="Iniciar conversa com AI"
         >
-          Iniciar Conversa
+          {t('startExperience')}
         </button>
       </div>
       )}
